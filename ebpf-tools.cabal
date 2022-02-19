@@ -1,6 +1,6 @@
 cabal-version:      2.4
 name:               ebpf-tools
-version:            0.0.1.0
+version:            0.1.0.0
 synopsis:           Assembler and disassembler for eBPF bytecode
 
 
@@ -15,35 +15,28 @@ author:             Ken Friis Larsen
 maintainer:         ken@friislarsen.net
 
 -- A copyright notice.
--- copyright:
+copyright:
 -- category:
 extra-source-files: CHANGELOG.md
 
+common deps
+    build-depends:    base ^>=4.14.3.0
+    default-language: Haskell2010
+
+
 library
+    import: deps
     exposed-modules:  Ebpf.Asm
                     , Ebpf.AsmParser
 
     -- Modules included in this library but not exported.
     -- other-modules:
-
-    -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
-    build-depends:    base ^>=4.14.3.0
-                    , parsec
+    build-depends:    parsec
     hs-source-dirs:   src
-    default-language: Haskell2010
 
 executable ebpf-tools
+    import: deps
     main-is:          Main.hs
-
-    -- Modules included in this executable, other than Main.
-    -- other-modules:
-
-    -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
-    build-depends:
-        base ^>=4.14.3.0,
-        ebpf-tools
+    build-depends:    ebpf-tools
 
     hs-source-dirs:   app
-    default-language: Haskell2010
