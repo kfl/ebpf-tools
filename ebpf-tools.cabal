@@ -31,12 +31,15 @@ library
 
     -- Modules included in this library but not exported.
     -- other-modules:
-    build-depends:    parsec
+    build-depends:    containers,
+                      parsec
     hs-source-dirs:   src
 
 executable ebpf-tools
     import: deps
     main-is:          Main.hs
-    build-depends:    ebpf-tools
+    build-depends:    ebpf-tools,
+                      optparse-applicative,
+                      pretty-simple
 
     hs-source-dirs:   app
