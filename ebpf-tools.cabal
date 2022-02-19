@@ -1,0 +1,49 @@
+cabal-version:      2.4
+name:               ebpf-tools
+version:            0.0.1.0
+synopsis:           Assembler and disassembler for eBPF bytecode
+
+
+-- A longer description of the package.
+-- description:
+
+-- A URL where users can report bugs.
+-- bug-reports:
+license:            MIT
+license-file:       LICENSE
+author:             Ken Friis Larsen
+maintainer:         ken@friislarsen.net
+
+-- A copyright notice.
+-- copyright:
+-- category:
+extra-source-files: CHANGELOG.md
+
+library
+    exposed-modules:  Ebpf.Asm
+                    , Ebpf.AsmParser
+
+    -- Modules included in this library but not exported.
+    -- other-modules:
+
+    -- LANGUAGE extensions used by modules in this package.
+    -- other-extensions:
+    build-depends:    base ^>=4.14.3.0
+                    , parsec
+    hs-source-dirs:   src
+    default-language: Haskell2010
+
+executable ebpf-tools
+    main-is:          Main.hs
+
+    -- Modules included in this executable, other than Main.
+    -- other-modules:
+
+    -- LANGUAGE extensions used by modules in this package.
+    -- other-extensions:
+    build-depends:
+        base ^>=4.14.3.0,
+        ebpf-tools
+
+    hs-source-dirs:   app
+    default-language: Haskell2010
