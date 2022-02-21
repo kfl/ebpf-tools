@@ -1,5 +1,5 @@
 {-# LANGUAGE NumericUnderscores #-}
-module Ebpf.Encoding where
+module Ebpf.Encode where
 
 import Ebpf.Asm
 import Data.Word
@@ -615,10 +615,3 @@ c_CALL = c_BPF_JMP   .|. c_BPF_CALL
 --  BPF opcode: `exit` --  `return r0`.
 c_EXIT :: Word8
 c_EXIT = c_BPF_JMP   .|. c_BPF_EXIT
-
---  Mask to extract the operation class from an operation code.
-c_BPF_CLS_MASK :: Word8
-c_BPF_CLS_MASK = 0x07
---  Mask to extract the arithmetic operation code from an instruction operation code.
-c_BPF_ALU_OP_MASK :: Word8
-c_BPF_ALU_OP_MASK = 0xf0
