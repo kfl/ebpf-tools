@@ -21,12 +21,16 @@ type Imm = Word64
 type RegImm = Either Reg Imm
 type Offset = Word64
 
+-- TODO support atomic operations
+-- TODO support absolute and indirect loads
+-- TODO support tail calls
+
 data Instruction =
     Binary BSize BinAlu Reg RegImm
   | Unary BSize UnAlu Reg
   | Store BSize Reg (Maybe Offset) RegImm
   | Load BSize Reg Reg (Maybe Offset)
-  | LoadStatic Reg Imm
+  | LoadImm Reg Imm
   | JCond Jcmp Reg RegImm Offset
   | Jmp Offset
   | Call Imm
@@ -34,3 +38,5 @@ data Instruction =
   deriving (Eq, Show, Ord)
 
 type Program = [Instruction]
+
+-- TODO add wellformed-ness check

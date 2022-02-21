@@ -95,7 +95,7 @@ instruction = do
     operators = M.fromList $ binAlus ++
                              unAlus ++
                              stores ++
-                             loads ++ [ ("lddx", LoadStatic <$> reg <* ocomma <*> imm)] ++
+                             loads ++ [ ("lddw", LoadImm <$> reg <* ocomma <*> imm)] ++
                              conditionals ++
                              [ ("ja", Jmp <$> imm),
                                ("call", Call <$> imm),
