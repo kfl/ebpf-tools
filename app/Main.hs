@@ -2,6 +2,8 @@ module Main where
 
 import Ebpf.Asm
 import Ebpf.AsmParser
+import qualified Ebpf.Encode as E
+import qualified Data.ByteString as B
 
 import Options.Applicative
 import Text.Pretty.Simple (pPrint)
@@ -48,8 +50,22 @@ main :: IO ()
 main = do
   Options tool outfile file <- execParser options
   case tool of
-    Dump -> do res <- parseFromFile file
-               case res of
-                 Left err -> print err
-                 Right prog -> pPrint prog
+    Dump -> do
+      res <- parseFromFile file
+      case res of
+        Left err -> print err
+        Right prog -> pPrint prog
+    Assemble -> do
+      res <- parseFromFile file
+      case res of
+        Left err -> print err
+        Right prog ->
+          case outfile of
+            Nothing ->
+              -- TODO Print hexdump to stdout
+              print "Need a file for binary output"
+            Just ofile ->
+              B.writeFile ofile $ E.encodeProgram prog
+
+
     _ -> error "Not implemented yet"
