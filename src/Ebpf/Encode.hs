@@ -119,7 +119,8 @@ encInstruction inst =
     Unary bs alu dst -> encUnary bs alu dst
     Store bs dst off src -> encStore bs dst off src
     Load bs dst src off -> encLoad bs dst src off
-    LoadImm (Reg dst) imm -> instr c_LD_DW_IMM (w8 dst) 0 0 (w32 imm) -- FIXME This should be encoded as two 8-bytes blocks
+    LoadImm (Reg dst) imm -> instr c_LD_DW_IMM (w8 dst) 0 0 (w32 imm) <>
+                             instr 0 0 0 0 (w32 (imm `shiftR` 32))
     JCond jcmp dst src off -> encJCond jcmp dst src off
     Jmp off -> instr c_JA 0 0 (w16 off) 0
     Call imm -> instr c_CALL 0 0 0 (w32 imm)
