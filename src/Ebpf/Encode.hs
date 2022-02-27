@@ -121,6 +121,8 @@ encInstruction inst =
     Load bs dst src off -> encLoad bs dst src off
     LoadImm (Reg dst) imm -> instr c_LD_DW_IMM (w8 dst) 0 0 (w32 imm) <>
                              instr 0 0 0 0 (w32 (imm `shiftR` 32))
+    LoadMapFd (Reg dst) imm -> instr c_LD_DW_IMM (w8 dst) c_BPF_PSEUDO_MAP_FD 0 (w32 imm) <>
+                               instr 0 0 0 0 (w32 (imm `shiftR` 32))
     JCond jcmp dst src off -> encJCond jcmp dst src off
     Jmp off -> instr c_JA 0 0 (w16 off) 0
     Call imm -> instr c_CALL 0 0 0 (w32 imm)
@@ -207,6 +209,9 @@ c_BPF_MEM = 0x60
 --  BPF mode modifier: atomic operations
 c_BPF_ATOMIC :: Word8
 c_BPF_ATOMIC = 0xc0
+
+c_BPF_PSEUDO_MAP_FD :: Word8
+c_BPF_PSEUDO_MAP_FD = 1
 
 
 -- For arithmetic (BPF_ALU/BPF_ALU64) and jump (BPF_JMP) instructions:

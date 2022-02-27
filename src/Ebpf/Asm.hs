@@ -31,6 +31,7 @@ data Instruction =
   | Store BSize Reg (Maybe Offset) RegImm
   | Load BSize Reg Reg (Maybe Offset)
   | LoadImm Reg Imm
+  | LoadMapFd Reg Imm
   | JCond Jcmp Reg RegImm Offset
   | Jmp Offset
   | Call Imm
