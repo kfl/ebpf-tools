@@ -4,7 +4,7 @@ import Ebpf.Asm
 import qualified Data.Char as C
 import qualified Data.Map.Strict as M
 import Data.Map.Strict (Map)
-import Data.Word (Word64)
+import Data.Int (Int64)
 
 import Text.Parsec
 import qualified Text.Parsec.String as PS
@@ -25,9 +25,9 @@ symbol s = lexeme $ string s
 operator = lexeme $ many1 alphaNum
 
 reg :: Parser Reg
-reg = Reg . read <$> lexeme (char 'r' >> many1 digit)
+reg = Reg . read <$> lexeme (char 'r' >> many1 digit) <?> "register"
 
-imm :: Parser Word64
+imm :: Parser Int64
 imm = lexeme number <?> "immediate constant"
   where
     number = sign <*> unsigned
