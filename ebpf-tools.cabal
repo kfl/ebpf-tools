@@ -31,6 +31,7 @@ library
     exposed-modules:  Ebpf.Asm
                     , Ebpf.AsmParser
                     , Ebpf.Encode
+                    , Ebpf.Helpers
     -- Modules included in this library but not exported.
     -- other-modules:
     build-depends:    containers,
