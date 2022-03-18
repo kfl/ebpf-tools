@@ -1,6 +1,7 @@
 module Ebpf.Asm where
 
 import Data.Int (Int64)
+import Data.Foldable (asum)
 
 data BinAlu = Add | Sub | Mul | Div | Or | And | Lsh | Rsh | Mod | Xor
   | Mov | Arsh
@@ -40,4 +41,33 @@ data Instruction =
 
 type Program = [Instruction]
 
--- TODO add wellformed-ness check
+
+wellformed :: Program -> Maybe String
+wellformed instrs = asum $ fmap wfInst instrs
+  where
+    wfReg (Reg n) | 0 <= n && n < 11 = Nothing
+                  | otherwise = Just $ "Invalid register: r"++show n
+    wfRegImm (Left r) = wfReg r
+    wfRegImm (Right imm) | -2^31 <= imm && imm < 2^31 = Nothing
+                         | otherwise = Just $ "Invalid immediate: "++show imm
+    wfOffset n | -2^15 <= n && n < 2^15 = Nothing
+               | otherwise = Just $ "Invalid immediate: "++show n
+    wfInst inst =
+      case inst of
+        Binary bs opr _ _ | bs == B8 || bs == B16 ->
+                            return $ concat ["Invalid byte size '", show bs
+                                            , "' for operation: ", show opr]
+        Binary _ _ r ri -> asum [wfReg r, wfRegImm ri]
+        Unary bs@B8 opr _ -> return $ concat ["Invalid byte size '", show bs
+                                            , "' for operation: ", show opr]
+        Unary B16 Neg _ -> return "Invalid byte size 'B16' for operation: Neg"
+        Unary _ _ r -> wfReg r
+        Store _ dst off src -> asum [wfReg dst, off >>= wfOffset, wfRegImm src]
+        Load _ dst src off -> asum [wfReg dst, off >>= wfOffset, wfReg src]
+        LoadImm dst _ -> wfReg dst
+        LoadMapFd dst _ -> wfReg dst
+        JCond _ lhs rhs off -> asum [wfReg lhs, wfRegImm rhs, wfOffset off]
+        Jmp off -> wfOffset off
+        _ -> Nothing
+  -- | Call Imm
+  -- | Exit
