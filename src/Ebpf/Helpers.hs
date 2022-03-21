@@ -63,3 +63,33 @@ le64 dst  = Unary B64 Le dst
 be16 dst  = Unary B16 Be dst
 be32 dst  = Unary B32 Be dst
 be64 dst  = Unary B64 Be dst
+
+
+ja off = Jmp off
+jmp off = Jmp off
+
+jeq_i dst imm off = JCond Jeq dst (Right imm) off
+jeq_r dst src off = JCond Jeq dst (Left src) off
+jgt_i dst imm off = JCond Jgt dst (Right imm) off
+jgt_r dst src off = JCond Jgt dst (Left src) off
+jge_i dst imm off = JCond Jge dst (Right imm) off
+jge_r dst src off = JCond Jge dst (Left src) off
+jlt_i dst imm off = JCond Jlt dst (Right imm) off
+jlt_r dst src off = JCond Jlt dst (Left src) off
+jle_i dst imm off = JCond Jle dst (Right imm) off
+jle_r dst src off = JCond Jle dst (Left src) off
+jset_i dst imm off = JCond Jset dst (Right imm) off
+jset_r dst src off = JCond Jset dst (Left src) off
+jne_i dst imm off = JCond Jne dst (Right imm) off
+jne_r dst src off = JCond Jne dst (Left src) off
+jsgt_i dst imm off = JCond Jsgt dst (Right imm) off
+jsgt_r dst src off = JCond Jsgt dst (Left src) off
+jsge_i dst imm off = JCond Jsge dst (Right imm) off
+jsge_r dst src off = JCond Jsge dst (Left src) off
+jslt_i dst imm off = JCond Jslt dst (Right imm) off
+jslt_r dst src off = JCond Jslt dst (Left src) off
+jsle_i dst imm off = JCond Jsle dst (Right imm) off
+jsle_r dst src off = JCond Jsle dst (Left src) off
+
+call f = Call f
+exit = Exit
