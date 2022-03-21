@@ -65,6 +65,24 @@ be32 dst  = Unary B32 Be dst
 be64 dst  = Unary B64 Be dst
 
 
+lddw dst imm = LoadImm dst imm
+loadMapFd dst imm = LoadMapFd dst imm
+
+ldxw dst src off = Load B32 dst src (Just off)
+ldxh dst src off = Load B16 dst src (Just off)
+ldxb dst src off = Load B8 dst src (Just off)
+ldxdw dst src off = Load B64 dst src (Just off)
+
+stw dst off imm = Store B32 dst (Just off) (Right imm)
+sth dst off imm = Store B16 dst (Just off) (Right imm)
+stb dst off imm = Store B8 dst (Just off) (Right imm)
+stdw dst off imm = Store B64 dst (Just off) (Right imm)
+
+stxw dst off src = Store B32 dst (Just off) (Left src)
+stxh dst off src = Store B16 dst (Just off) (Left src)
+stxb dst off src = Store B8 dst (Just off) (Left src)
+stxdw dst off src = Store B64 dst (Just off) (Left src)
+
 ja off = Jmp off
 jmp off = Jmp off
 
