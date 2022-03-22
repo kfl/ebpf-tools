@@ -10,6 +10,7 @@ import Options.Applicative
 import Text.Pretty.Simple (pPrint)
 import Text.Printf (printf)
 import Data.List (intersperse)
+import qualified System.Exit as SE
 
 data Tool = Dump
           | Assemble
@@ -62,10 +63,11 @@ main = do
                   Just ofile -> B.writeFile ofile
       res <- parseFromFile file
       case res of
-        Left err -> print err
+        Left err -> SE.die err
         Right prog ->
-          out $ E.encodeProgram prog
-
+          case wellformed prog of
+            Just err -> SE.die $ "Program not wellformed: " ++ err
+            _ -> out $ E.encodeProgram prog
 
     _ -> error "Not implemented yet"
 
