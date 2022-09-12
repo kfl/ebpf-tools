@@ -30,11 +30,14 @@ library
     import: deps
     exposed-modules:  Ebpf.Asm
                     , Ebpf.AsmParser
+                    , Ebpf.Decode
                     , Ebpf.Encode
                     , Ebpf.Helpers
+
     -- Modules included in this library but not exported.
     -- other-modules:
-    build-depends:    containers,
+    build-depends:    binary,
+                      containers,
                       parsec
     hs-source-dirs:   src
 
