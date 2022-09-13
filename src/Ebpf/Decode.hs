@@ -20,3 +20,11 @@ instr = do
       _ | opc == E.c_EXIT -> Exit
       _ | opc == E.c_CALL -> Call (fromIntegral imm)
       _ | opc == E.c_JA -> Jmp (fromIntegral off)
+
+
+program :: BG.Get Program
+program = do
+  done <- BG.isEmpty
+  if done
+    then return mempty
+    else (:) <$> instr <*> program
