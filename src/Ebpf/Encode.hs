@@ -62,7 +62,7 @@ encUnary bs Neg (Reg dst) = instr (c_BPF_NEG .|. bbs) (w8 dst) 0 0 0
     bbs = case bs of
             B32 -> c_BPF_ALU
             B64 -> c_BPF_ALU64
-enUnary bs alu (Reg dst) = instr balu (w8 dst) 0 0 imm
+encUnary bs alu (Reg dst) = instr balu (w8 dst) 0 0 imm
   where
     balu = case alu of
              Le -> c_LE
