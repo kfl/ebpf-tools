@@ -20,7 +20,7 @@ copyright:
 extra-source-files: CHANGELOG.md
 
 common deps
-    build-depends:    base ^>=4.14.3.0,
+    build-depends:    base >=4.14.3.0 && < 5,
                       bytestring
 
     default-language: Haskell2010

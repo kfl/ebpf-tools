@@ -3,7 +3,8 @@ module Ebpf.Encode where
 
 import Ebpf.Asm
 import Data.Word
-import Data.Bits
+import Data.Bits ((.|.),(.&.), shiftL, shiftR, rotateL, rotateR)
+
 
 import qualified Data.ByteString as B
 
