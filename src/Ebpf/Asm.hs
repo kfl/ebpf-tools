@@ -69,5 +69,5 @@ wellformed instrs = asum $ fmap wfInst instrs
         JCond _ lhs rhs off -> asum [wfReg lhs, wfRegImm rhs, wfOffset off]
         Jmp off -> wfOffset off
         _ -> Nothing
-  -- | Call Imm
-  -- | Exit
+  -- TODO Call Imm
+  -- TODO Exit
