@@ -46,7 +46,7 @@ lowercase opr = map C.toLower $ show opr
 
 binAlus = do
   alu <- [Add .. Arsh]
-  (post, sz) <- [("32", B32), ("", B64)]
+  (post, sz) <- [("32", B32), ("64", B64), ("", B64)]
   let name = lowercase alu ++ post
   return (name, Binary sz alu <$> reg <* ocomma <*> regimm)
 
@@ -54,7 +54,7 @@ binAlus = do
 unAlus = do
  alu <- [Neg .. Be]
  (post, sz) <- case alu of
-                 Neg -> [("32", B32), ("", B64)]
+                 Neg -> [("32", B32), ("64", B64), ("", B64)]
                  _ -> [("16", B16), ("32", B32), ("64", B64)]
  let name = lowercase alu ++ post
  return (name, Unary sz alu <$> reg)
