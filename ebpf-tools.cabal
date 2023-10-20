@@ -33,12 +33,15 @@ library
                     , Ebpf.Decode
                     , Ebpf.Encode
                     , Ebpf.Helpers
+                    , Ebpf.Display
 
     -- Modules included in this library but not exported.
     -- other-modules:
     build-depends:    binary,
                       containers,
-                      parsec
+                      parsec,
+                      text >= 2.0.2,
+                      text-display >= 0.0.5
     hs-source-dirs:   src
 
 executable ebpf-tools
