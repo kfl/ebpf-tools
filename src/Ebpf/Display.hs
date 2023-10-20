@@ -26,15 +26,18 @@ instance Display BSize where
 instance Display Jcmp where
   displayBuilder cmp = displayBuilder $ lowercase cmp
 
-displayRegImm (Left r) = displayBuilder r
-displayRegImm (Right i) = displayBuilder i
+displayRIBuilder (Left r) = displayBuilder r
+displayRIBuilder (Right i) = displayBuilder i
+
+displayRegImm (Left r) = display r
+displayRegImm (Right i) = display i
 
 instance Display Instruction where
   displayBuilder instr =
     mconcat $
     case instr of
       Binary bsz alu r ir ->
-        [displayBuilder alu, displayBuilder bsz, " ", displayBuilder r, ", ", displayRegImm ir]
+        [displayBuilder alu, displayBuilder bsz, " ", displayBuilder r, ", ", displayRIBuilder ir]
       Unary bsz alu r ->
         [displayBuilder alu, displayBuilder bsz, " ", displayBuilder r]
       Store bsz r moff ir ->
@@ -53,7 +56,7 @@ instance Display Instruction where
       LoadMapFd r c ->
         ["load_map_fd ", displayBuilder r, ", ", displayBuilder c]
       JCond cmp r ir off ->
-        [displayBuilder cmp, " ", displayBuilder r, ", ", displayRegImm ir,
+        [displayBuilder cmp, " ", displayBuilder r, ", ", displayRIBuilder ir,
          ", +", displayBuilder off]
       Jmp off -> ["ja +", displayBuilder off]
       Call f -> ["call ", displayBuilder f]
