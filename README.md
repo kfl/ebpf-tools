@@ -3,12 +3,32 @@ eBPF Tools
 
 Framework for allowing easy experimentation with eBPF byte-code.
 
+The project can be used both as a library for working with eBPF
+byte-code, and it comes with a command-line program that can be as an
+assembler and (eventually) a disassembler.
+
+
 Build instructions
 ------------------
 
 Build with:
 
     $ cabal build
+
+
+As a library
+------------
+
+The project consists of a number of modules:
+
+ * [`Ebpf.Asm`](./src/Ebpf/Asm.hs) types for representing AST for eBPF programs.
+ * [`Ebpf.AsmParser`](./src/Ebpf/AsmParser.hs) parser for a textual format of eBPF bytecode.
+ * [`Ebpf.Decode`](./src/Ebpf/Decode.hs) reading bytecode into an AST (incomplete).
+ * [`Ebpf.Encode`](./src/Ebpf/Encode.hs) encoding the AST to bytecode.
+ * [`Ebpf.Helpers`](./src/Ebpf/Helpers.hs) helper functions for building AST.
+ * [`Ebpf.Display`](./src/Ebpf/Display.hs) for user-facing printing of the AST.
+
+
 
 Command-line executable
 -----------------------
@@ -42,5 +62,5 @@ See
 
 * [Instruction set
   reference](https://github.com/iovisor/bpf-docs/blob/master/eBPF.md)
- 
+
 * [ubpf: User-space eBPF VM](https://github.com/iovisor/ubpf/)
