@@ -98,6 +98,7 @@ instruction = do
                              loads ++ [ ("lddw", LoadImm <$> reg <* ocomma <*> imm)] ++
                              conditionals ++
                              [ ("ja", Jmp <$> imm),
+                               ("jmp", Jmp <$> imm),
                                ("call", Call <$> imm),
                                ("exit", pure Exit)]
 
