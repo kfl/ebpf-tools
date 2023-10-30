@@ -1,16 +1,26 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
 import Ebpf.Asm
 import Ebpf.AsmParser
+import Ebpf.Display()
 import qualified Ebpf.Encode as E
+import qualified Ebpf.Decode as D
 import qualified Data.ByteString as B
+import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Internal as B (w2c)
+import qualified Data.Binary.Get as BG
+import qualified Data.Binary as Bin
+
 
 import Options.Applicative
 import Text.Pretty.Simple (pPrint)
 import Text.Printf (printf)
-import Data.List (intersperse)
 import qualified System.Exit as SE
+import Data.Text.Display
+import qualified Data.Text as T
+import qualified Data.Text.IO as TIO
+
 
 data Tool = Dump
           | Assemble
@@ -58,9 +68,7 @@ main = do
         Left err -> print err
         Right prog -> pPrint prog
     Assemble -> do
-      let out = case outfile of
-                  Nothing -> hexDump
-                  Just ofile -> B.writeFile ofile
+      let out = maybe hexDump B.writeFile outfile
       res <- parseFromFile file
       case res of
         Left err -> SE.die err
@@ -69,8 +77,19 @@ main = do
             Just err -> SE.die $ "Program not wellformed: " ++ err
             _ -> out $ E.encodeProgram prog
 
-    _ -> error "Not implemented yet"
+    Disassemble -> do
+      let out = maybe TIO.putStrLn TIO.writeFile outfile
+      bytes <- BL.readFile file
+      case BG.runGetOrFail D.program bytes of
+        Left (_, _, err) -> SE.die $ "Could not decode bytes: " ++ err
+        Right(_,_, prog) -> out $ displayProgram prog
 
+--    _ -> error "Not implemented yet"
+
+
+displayProgram :: Program -> T.Text
+displayProgram prog =
+  T.concat $ map (\i -> display i <> "\n") prog
 
 
 -- | Print a strict ByteString roughly in the same format as running
@@ -84,5 +103,5 @@ hexDump bs = dumpLines 0 bs
     | B.null bs = return ()
     | otherwise = do
         printf "%08x  " offset
-        putStrLn $ concat $ intersperse " " $ map (printf "%02x") $ B.unpack $ B.take 8 bs
+        putStrLn $ unwords $ map (printf "%02x") $ B.unpack $ B.take 8 bs
         dumpLines (offset + 8) $ B.drop 8 bs
