@@ -207,7 +207,7 @@ jsle_i dst imm off = JCond Jsle dst (Right $ fromIntegral imm) (fromIntegral off
 jsle_r :: Reg -> Reg -> Offset16 -> Instruction
 jsle_r dst src off = JCond Jsle dst (Left src) (fromIntegral off)
 
-call :: Imm -> Instruction
-call f = Call f
+call :: Imm32 -> Instruction
+call f = Call $ fromIntegral f
 exit :: Instruction
 exit = Exit
