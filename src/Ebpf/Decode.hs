@@ -47,8 +47,8 @@ instr = do
       _ | opc == E.c_MOV32_REG -> H.mov32_r dst src
       _ | opc == E.c_ARSH32_IMM -> H.arsh32_i dst $ fromIntegral imm
       _ | opc == E.c_ARSH32_REG -> H.arsh32_r dst src
--- c_LE :: Word8
--- c_BE :: Word8
+      _ | opc == E.c_LE -> H.le32 dst
+      _ | opc == E.c_BE -> H.be32 dst
       _ | opc == E.c_ADD64_IMM -> H.add64_i dst $ fromIntegral imm
       _ | opc == E.c_ADD64_REG -> H.add64_r dst src
       _ | opc == E.c_SUB64_IMM -> H.sub64_i dst $ fromIntegral imm
