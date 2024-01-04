@@ -32,6 +32,9 @@ displayRIBuilder (Right i) = displayBuilder i
 displayRegImm (Left r) = display r
 displayRegImm (Right i) = display i
 
+displayMemLocBuilder r moff = mconcat
+  ["[", displayBuilder r, maybe "" (\i -> " +"<>displayBuilder i) moff, "]"]
+
 instance Display Instruction where
   displayBuilder instr =
     mconcat $
@@ -41,16 +44,14 @@ instance Display Instruction where
       Unary bsz alu r ->
         [displayBuilder alu, displayBuilder bsz, " ", displayBuilder r]
       Store bsz r moff ir ->
-        ["st", x, mem_sz, displayBuilder r, off, " ", src]
+        ["st", x, mem_sz, " ", displayMemLocBuilder r moff, ", ", src]
         where (x, src) = case ir of
                            Left r -> ("x", displayBuilder r)
                            Right i -> ("", displayBuilder i)
               mem_sz = case bsz of B8 -> "b" ; B16 -> "h" ; B32 -> "w" ; B64 -> "dw"
-              off = maybe "" (\ i -> " +"<>displayBuilder i) moff
       Load bsz dst src moff ->
         ["ldx", case bsz of B8 -> "b" ; B16 -> "h" ; B32 -> "w" ; B64 -> "dw", " ",
-         displayBuilder dst, ", ",
-         displayBuilder src, maybe "" (\ i -> " +"<>displayBuilder i) moff]
+         displayBuilder dst, ", ", displayMemLocBuilder src moff]
       LoadImm r c ->
         ["lddw ", displayBuilder r, ", ", displayBuilder c]
       LoadMapFd r c ->
