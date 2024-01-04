@@ -1,3 +1,5 @@
+{- HLINT ignore "Use camelCase" -}
+{- HLINT ignore "Eta reduce" -}
 module Ebpf.Helpers where
 
 import Ebpf.Asm

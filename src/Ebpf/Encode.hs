@@ -1,4 +1,5 @@
 {-# LANGUAGE NumericUnderscores #-}
+{- HLINT ignore "Use camelCase" -}
 module Ebpf.Encode where
 
 import Ebpf.Asm
