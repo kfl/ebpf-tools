@@ -7,6 +7,7 @@ import qualified Data.Char as C
 import qualified Data.Text as T
 
 import Ebpf.Asm
+import Ebpf.Helpers
 
 instance Display Reg where
   displayBuilder (Reg i) = "r" <> displayBuilder i
@@ -32,8 +33,10 @@ displayRIBuilder (Right i) = displayBuilder i
 displayRegImm (Left r) = display r
 displayRegImm (Right i) = display i
 
-displayMemLocBuilder r moff = mconcat
-  ["[", displayBuilder r, maybe "" (\i -> " +"<>displayBuilder i) moff, "]"]
+displayMemLocBuilder r moff = mconcat ["[", displayBuilder r, off, "]"]
+  where off = case moff of
+                Just i | i /= 0 -> " +" <> displayBuilder i
+                _ -> ""
 
 instance Display Instruction where
   displayBuilder instr =
