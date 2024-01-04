@@ -61,7 +61,7 @@ unAlus = do
 
 
 memref = between (symbol "[") (symbol "]")
-         ((,) <$> reg <*> (optionMaybe (symbol "+" *> imm)))
+         ((,) <$> reg <*> optionMaybe (symbol "+" *> imm))
 
 stores = do
   (mem_sz, bsz) <- [("b", B8), ("h", B16), ("w", B32), ("dw", B64)]
