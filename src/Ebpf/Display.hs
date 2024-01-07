@@ -3,6 +3,7 @@ module Ebpf.Display where
 
 
 import Data.Text.Display
+import qualified Data.Text.Lazy.Builder as TB
 import qualified Data.Char as C
 import qualified Data.Text as T
 
@@ -27,11 +28,11 @@ instance Display BSize where
 instance Display Jcmp where
   displayBuilder cmp = displayBuilder $ lowercase cmp
 
-displayRIBuilder (Left r) = displayBuilder r
-displayRIBuilder (Right i) = displayBuilder i
+displayRIBuilder :: RegImm -> TB.Builder
+displayRIBuilder = either displayBuilder displayBuilder
 
-displayRegImm (Left r) = display r
-displayRegImm (Right i) = display i
+displayRegImm :: RegImm -> T.Text
+displayRegImm = either display display
 
 displayMemLocBuilder r moff = mconcat ["[", displayBuilder r, off, "]"]
   where off = case moff of
