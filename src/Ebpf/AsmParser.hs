@@ -5,8 +5,10 @@ import qualified Data.Char as C
 import qualified Data.Map.Strict as M
 import Data.Map.Strict (Map)
 import Data.Int (Int64)
+import Data.Bifunctor (first)
 
 import Text.Parsec
+import qualified Text.Parsec as PS
 import qualified Text.Parsec.String as PS
 
 type Parser a = PS.Parser a
@@ -105,9 +107,8 @@ instruction = do
 
 program = sc >> many1 instruction <* eof
 
+parse :: String -> Either String Program
+parse str = first show $ PS.parse program "<input>" str
+
 parseFromFile :: FilePath -> IO(Either String Program)
-parseFromFile filename =
-  do result <- PS.parseFromFile program filename
-     return $ case result of
-                Left err   -> Left $ show err
-                Right prog -> Right prog
+parseFromFile filename = first show <$> PS.parseFromFile program filename
