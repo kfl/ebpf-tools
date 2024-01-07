@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase, OverloadedStrings #-}
 module Ebpf.Display where
 
 
@@ -8,25 +8,24 @@ import qualified Data.Char as C
 import qualified Data.Text as T
 
 import Ebpf.Asm
-import Ebpf.Helpers
 
 instance Display Reg where
   displayBuilder (Reg i) = "r" <> displayBuilder i
 
-lowercase opr = map C.toLower $ show opr
+lowercaseShow :: Show a => a -> TB.Builder
+lowercaseShow x = displayBuilder $ map C.toLower $ show x
 
 instance Display BinAlu where
-  displayBuilder alu = displayBuilder $ lowercase alu
+  displayBuilder = lowercaseShow
 
 instance Display UnAlu where
-  displayBuilder alu = displayBuilder $ lowercase alu
+  displayBuilder = lowercaseShow
 
 instance Display BSize where
-  displayBuilder bsz =
-    displayBuilder (case bsz of B8 -> T.pack "8" ; B16 -> "16" ; B32 -> "32" ; B64 -> "64")
+  displayBuilder = TB.fromText . \case B8 -> "8" ; B16 -> "16" ; B32 -> "32" ; B64 -> "64"
 
 instance Display Jcmp where
-  displayBuilder cmp = displayBuilder $ lowercase cmp
+  displayBuilder = lowercaseShow
 
 displayRIBuilder :: RegImm -> TB.Builder
 displayRIBuilder = either displayBuilder displayBuilder
@@ -39,6 +38,8 @@ displayMemLocBuilder r moff = mconcat ["[", displayBuilder r, off, "]"]
                 Just i | i /= 0 -> " +" <> displayBuilder i
                 _ -> ""
 
+memSz = \case B8 -> "b" ; B16 -> "h" ; B32 -> "w" ; B64 -> "dw"
+
 instance Display Instruction where
   displayBuilder instr =
     mconcat $
@@ -48,14 +49,12 @@ instance Display Instruction where
       Unary bsz alu r ->
         [displayBuilder alu, displayBuilder bsz, " ", displayBuilder r]
       Store bsz r moff ir ->
-        ["st", x, mem_sz, " ", displayMemLocBuilder r moff, ", ", src]
+        ["st", x, memSz bsz, " ", displayMemLocBuilder r moff, ", ", src]
         where (x, src) = case ir of
                            Left r -> ("x", displayBuilder r)
                            Right i -> ("", displayBuilder i)
-              mem_sz = case bsz of B8 -> "b" ; B16 -> "h" ; B32 -> "w" ; B64 -> "dw"
       Load bsz dst src moff ->
-        ["ldx", case bsz of B8 -> "b" ; B16 -> "h" ; B32 -> "w" ; B64 -> "dw", " ",
-         displayBuilder dst, ", ", displayMemLocBuilder src moff]
+        ["ldx", memSz bsz, " ", displayBuilder dst, ", ", displayMemLocBuilder src moff]
       LoadImm r c ->
         ["lddw ", displayBuilder r, ", ", displayBuilder c]
       LoadMapFd r c ->
