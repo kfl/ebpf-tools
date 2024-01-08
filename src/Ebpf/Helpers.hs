@@ -132,32 +132,35 @@ lddw dst imm = LoadImm dst imm
 loadMapFd :: Reg -> Imm -> Instruction
 loadMapFd dst imm = LoadMapFd dst imm
 
+memOffset off | off /= 0 = Just $ fromIntegral off
+              | otherwise = Nothing
+
 ldxw :: Reg -> Reg -> Offset16 -> Instruction
-ldxw dst src off = Load B32 dst src (Just $ fromIntegral off)
+ldxw dst src off = Load B32 dst src (memOffset off)
 ldxh :: Reg -> Reg -> Offset16 -> Instruction
-ldxh dst src off = Load B16 dst src (Just $ fromIntegral off)
+ldxh dst src off = Load B16 dst src (memOffset off)
 ldxb :: Reg -> Reg -> Offset16 -> Instruction
-ldxb dst src off = Load B8 dst src (Just $ fromIntegral off)
+ldxb dst src off = Load B8 dst src (memOffset off)
 ldxdw :: Reg -> Reg -> Offset16 -> Instruction
-ldxdw dst src off = Load B64 dst src (Just $ fromIntegral off)
+ldxdw dst src off = Load B64 dst src (memOffset off)
 
 stw :: Reg -> Offset16 -> Imm32 -> Instruction
-stw dst off imm = Store B32 dst (Just $ fromIntegral off) (Right $ fromIntegral imm)
+stw dst off imm = Store B32 dst (memOffset off) (Right $ fromIntegral imm)
 sth :: Reg -> Offset16 -> Imm32 -> Instruction
-sth dst off imm = Store B16 dst (Just $ fromIntegral off) (Right $ fromIntegral imm)
+sth dst off imm = Store B16 dst (memOffset off) (Right $ fromIntegral imm)
 stb :: Reg -> Offset16 -> Imm32 -> Instruction
-stb dst off imm = Store B8 dst (Just $ fromIntegral off) (Right $ fromIntegral imm)
+stb dst off imm = Store B8 dst (memOffset off) (Right $ fromIntegral imm)
 stdw :: Reg -> Offset16 -> Imm32 -> Instruction
-stdw dst off imm = Store B64 dst (Just $ fromIntegral off) (Right $ fromIntegral imm)
+stdw dst off imm = Store B64 dst (memOffset off) (Right $ fromIntegral imm)
 
 stxw :: Reg -> Offset16 -> Reg -> Instruction
-stxw dst off src = Store B32 dst (Just $ fromIntegral off) (Left src)
+stxw dst off src = Store B32 dst (memOffset off) (Left src)
 stxh :: Reg -> Offset16 -> Reg -> Instruction
-stxh dst off src = Store B16 dst (Just $ fromIntegral off) (Left src)
+stxh dst off src = Store B16 dst (memOffset off) (Left src)
 stxb :: Reg -> Offset16 -> Reg -> Instruction
-stxb dst off src = Store B8 dst (Just $ fromIntegral off) (Left src)
+stxb dst off src = Store B8 dst (memOffset off) (Left src)
 stxdw :: Reg -> Offset16 -> Reg -> Instruction
-stxdw dst off src = Store B64 dst (Just $ fromIntegral off) (Left src)
+stxdw dst off src = Store B64 dst (memOffset off) (Left src)
 
 ja :: Offset16 -> Instruction
 ja off = Jmp (fromIntegral off)
