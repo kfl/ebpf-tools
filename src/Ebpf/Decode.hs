@@ -4,11 +4,9 @@ import Ebpf.Asm
 import qualified Ebpf.Encode as E
 import qualified Ebpf.Helpers as H
 
-
-import qualified Data.ByteString as B
+import qualified Data.ByteString.Lazy as BL
 import qualified Data.Binary.Get as BG
 import Data.Bits ((.|.),(.&.), shiftL, shiftR, rotateL, rotateR)
-
 
 instr :: BG.Get Instruction
 instr = do
@@ -122,6 +120,7 @@ program = do
     then return mempty
     else (:) <$> instr <*> program
 
+decodeProgram :: BL.ByteString -> Either String Program
 decodeProgram bytes =
   case BG.runGetOrFail program bytes of
     Left (_, _, err) -> Left $ "Could not decode bytes: " ++ err
