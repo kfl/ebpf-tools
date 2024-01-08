@@ -65,3 +65,7 @@ instance Display Instruction where
       Jmp off -> ["ja +", displayBuilder off]
       Call f -> ["call ", displayBuilder f]
       Exit -> ["exit"]
+
+displayProgram :: Program -> T.Text
+displayProgram prog =
+  T.concat $ map (\i -> display i <> "\n") prog

@@ -3,7 +3,7 @@ module Main where
 
 import Ebpf.Asm
 import Ebpf.AsmParser
-import Ebpf.Display()
+import Ebpf.Display(displayProgram)
 import qualified Ebpf.Encode as E
 import qualified Ebpf.Decode as D
 import qualified Data.ByteString as B
@@ -86,10 +86,6 @@ main = do
 
 --    _ -> error "Not implemented yet"
 
-
-displayProgram :: Program -> T.Text
-displayProgram prog =
-  T.concat $ map (\i -> display i <> "\n") prog
 
 
 -- | Print a strict ByteString roughly in the same format as running
