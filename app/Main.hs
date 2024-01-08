@@ -80,9 +80,7 @@ main = do
     Disassemble -> do
       let out = maybe TIO.putStrLn TIO.writeFile outfile
       bytes <- BL.readFile file
-      case BG.runGetOrFail D.program bytes of
-        Left (_, _, err) -> SE.die $ "Could not decode bytes: " ++ err
-        Right(_,_, prog) -> out $ displayProgram prog
+      either SE.die (out . displayProgram) $ D.decodeProgram bytes
 
 --    _ -> error "Not implemented yet"
 

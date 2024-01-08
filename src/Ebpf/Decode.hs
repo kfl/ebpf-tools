@@ -115,11 +115,14 @@ instr = do
           return $ H.lddw dst (imm64Lower + imm64Upper `shiftL` 32)
 
 
-
-
 program :: BG.Get Program
 program = do
   done <- BG.isEmpty
   if done
     then return mempty
     else (:) <$> instr <*> program
+
+decodeProgram bytes =
+  case BG.runGetOrFail program bytes of
+    Left (_, _, err) -> Left $ "Could not decode bytes: " ++ err
+    Right(_,_, prog) -> Right prog
