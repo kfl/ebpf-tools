@@ -47,4 +47,15 @@ test_basic =
             , Binary B32 Sub (Reg 1) (Right 1)
             , JCond Jgt (Reg 1) (Right 0) (-3)
             , Exit]
+
+  , testCase "store and load a byte" $
+      parse [r|
+              stb [r1+2], 0x2a
+              ldxb r0, [r1+2]
+              exit
+              |]
+      @?=
+      Right [ Store B8 (Reg 1) (Just 2) (Right 42)
+            , Load B8 (Reg 0) (Reg 1) (Just 2)
+            , Exit]
   ]
