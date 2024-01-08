@@ -1,54 +1,69 @@
-cabal-version:      2.4
-name:               ebpf-tools
-version:            0.1.0.0
-synopsis:           Assembler and disassembler for eBPF bytecode
+cabal-version:   3.4
+name:            ebpf-tools
+version:         0.1.0.0
+license:         MIT
+license-file:    LICENSE
+copyright:       2022-2024 Ken Friis Larsen
+maintainer:      ken@friislarsen.net
+author:          Ken Friis Larsen
+homepage:        https://github.com/kfl/ebpf-tools
+bug-reports:     https://github.com/kfl/ebpf-tools/issues
+synopsis:        Assembler and disassembler for eBPF bytecode
+extra-doc-files:
+    README.md
+    CHANGELOG.md
 
+source-repository head
+    type:     git
+    location: https://github.com/kfl/ebpf-tools.git
 
--- A longer description of the package.
--- description:
-
--- A URL where users can report bugs.
--- bug-reports:
-license:            MIT
-license-file:       LICENSE
-author:             Ken Friis Larsen
-maintainer:         ken@friislarsen.net
-
--- A copyright notice.
-copyright:
--- category:
-extra-source-files: CHANGELOG.md
-
-common deps
-    build-depends:    base >=4.14.3.0 && < 5,
-                      binary,
-                      bytestring,
-                      text >= 2.0.2,
-                      text-display >= 0.0.5
+common common-deps
+    build-depends:
+        base >= 4.14.3.0 && < 5,
+        binary >= 0.8.7 && < 0.9,
+        bytestring,
+        text >= 2.0.2 && < 3,
+        text-display >= 0.0.5 && < 0.1
 
     default-language: Haskell2010
 
 
 library
-    import: deps
-    exposed-modules:  Ebpf.Asm
-                    , Ebpf.AsmParser
-                    , Ebpf.Decode
-                    , Ebpf.Encode
-                    , Ebpf.Helpers
-                    , Ebpf.Display
+    import: common-deps
+    exposed-modules:
+        Ebpf.Asm
+        Ebpf.AsmParser
+        Ebpf.Decode
+        Ebpf.Encode
+        Ebpf.Helpers
+        Ebpf.Display
 
-    -- Modules included in this library but not exported.
-    -- other-modules:
-    build-depends:    containers,
-                      parsec
     hs-source-dirs:   src
+    default-language: Haskell2010
+    build-depends:
+        containers,
+        parsec
 
 executable ebpf-tools
-    import: deps
+    import: common-deps
     main-is:          Main.hs
-    build-depends:    ebpf-tools,
-                      optparse-applicative,
-                      pretty-simple
-
     hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        ebpf-tools,
+        optparse-applicative,
+        pretty-simple
+
+test-suite ebpf-tools-test
+    import: common-deps
+    type:             exitcode-stdio-1.0
+    main-is:          Main.hs
+    hs-source-dirs:   test
+    other-modules:    AsmParserTest
+    default-language: Haskell2010
+    ghc-options:      -threaded -rtsopts -with-rtsopts=-N
+    build-depends:
+        tasty,
+        tasty-hunit,
+        raw-strings-qq,
+        ebpf-tools
