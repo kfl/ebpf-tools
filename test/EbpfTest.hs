@@ -14,27 +14,27 @@ import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 
 
-
-test_parse_display =
-    testGroup "Parse the output from display" $
+test_roundtrips =
+  testGroup "Round-trips"
+  [ testGroup "Parse the output from display" $
     map testParseDisplayRoundtrip examplePrograms
 
-testParseDisplayRoundtrip (title, p) =
-  testCase title $
-      parse (T.unpack $ displayProgram p)
-      @?=
-      Right p
-
-
-test_decode_encode =
-    testGroup "Decode the output from encode" $
+  , testGroup "Decode the output from encode" $
     map testDecodeEncodeRoundtrip examplePrograms
 
-testDecodeEncodeRoundtrip (title, p) =
-  testCase title $
-      D.decodeProgram (BL.fromStrict $ E.encodeProgram p)
-      @?=
-      Right p
+  ]
+  where
+    testParseDisplayRoundtrip (title, p) =
+      testCase title $
+         parse (T.unpack $ displayProgram p)
+         @?=
+         Right p
+
+    testDecodeEncodeRoundtrip (title, p) =
+      testCase title $
+         D.decodeProgram (BL.fromStrict $ E.encodeProgram p)
+         @?=
+         Right p
 
 
 examplePrograms =
