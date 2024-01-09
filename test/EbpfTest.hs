@@ -49,4 +49,13 @@ examplePrograms =
      , Load B64 (Reg 0) (Reg 1) (Just (-8))
      , Exit])
 
+  , ("sum of the first five integers",
+     [ Binary B64 Mov (Reg 0) (Right 0)
+     , Binary B32 Mov (Reg 1) (Right 5)
+     , Jmp 2
+     , Binary B64 Add (Reg 0) (Left (Reg 1))
+     , Binary B32 Sub (Reg 1) (Right 1)
+     , JCond Jgt (Reg 1) (Right 0) (-3)
+     , Exit])
+
   ]
