@@ -1,4 +1,4 @@
-{- This module in for cross-cutting tests between multiple modules. -}
+{- This module is for cross-cutting tests between multiple modules. -}
 module EbpfTest where
 
 import Test.Tasty
@@ -24,7 +24,6 @@ testParseDisplayRoundtrip (title, p) =
       parse (T.unpack $ displayProgram p)
       @?=
       Right p
-
 
 
 test_decode_encode =
