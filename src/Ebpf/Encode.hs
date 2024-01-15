@@ -56,8 +56,8 @@ encBinary bs alu (Reg dst) src = instr (balu .|. bbs .|. bmod) bdst bsrc 0 bimm
              Mov -> c_BPF_MOV
              Arsh -> c_BPF_ARSH
     (bmod, bsrc, bimm) = case src of
-                           Left(Reg src) -> (c_BPF_X, w8 src, 0)
-                           Right imm -> (c_BPF_K, 0, w32 imm)
+                           R(Reg src) -> (c_BPF_X, w8 src, 0)
+                           Imm imm -> (c_BPF_K, 0, w32 imm)
 
 encUnary bs Neg (Reg dst) = instr (c_BPF_NEG .|. bbs) (w8 dst) 0 0 0
   where
@@ -77,8 +77,8 @@ encUnary bs alu (Reg dst) = instr balu (w8 dst) 0 0 imm
 encStore bs (Reg dst) off src = instr (c_BPF_MEM .|. bmod .|. bbs) (w8 dst) bsrc boff bimm
   where
     (bmod, bsrc, bimm) = case src of
-                           Left(Reg src) -> (c_BPF_STX, w8 src, 0)
-                           Right imm -> (c_BPF_ST, 0, w32 imm)
+                           R(Reg src) -> (c_BPF_STX, w8 src, 0)
+                           Imm imm -> (c_BPF_ST, 0, w32 imm)
     bbs = case bs of
             B8 -> c_BPF_B
             B16 -> c_BPF_H
@@ -99,8 +99,8 @@ encLoad bs (Reg dst) (Reg src) off = instr (c_BPF_MEM .|. c_BPF_LDX .|. bbs) (w8
 encJCond jcmp (Reg dst) src off = instr (c_BPF_JMP .|. bmod .|. bjcmp) (w8 dst) bsrc (w16 off) bimm
   where
     (bmod, bsrc, bimm) = case src of
-                           Left(Reg src) -> (c_BPF_X, w8 src, 0)
-                           Right imm -> (c_BPF_K, 0, w32 imm)
+                           R(Reg src) -> (c_BPF_X, w8 src, 0)
+                           Imm imm -> (c_BPF_K, 0, w32 imm)
     bjcmp = case jcmp of
               Jeq -> c_BPF_JEQ
               Jgt -> c_BPF_JGT

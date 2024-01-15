@@ -1,4 +1,4 @@
-{-# LANGUAGE LambdaCase, OverloadedStrings #-}
+{-# LANGUAGE FlexibleInstances, LambdaCase, OverloadedStrings #-}
 module Ebpf.Display where
 
 
@@ -27,11 +27,9 @@ instance Display BSize where
 instance Display Jcmp where
   displayBuilder = lowercaseShow
 
-displayRIBuilder :: RegImm -> TB.Builder
-displayRIBuilder = either displayBuilder displayBuilder
-
-displayRegImm :: RegImm -> T.Text
-displayRegImm = either display display
+instance Display RegImm where
+  displayBuilder (R r) = displayBuilder r
+  displayBuilder (Imm n) = displayBuilder n
 
 displayMemLocBuilder r moff = mconcat ["[", displayBuilder r, off, "]"]
   where off = case moff of
@@ -40,19 +38,19 @@ displayMemLocBuilder r moff = mconcat ["[", displayBuilder r, off, "]"]
 
 memSz = \case B8 -> "b" ; B16 -> "h" ; B32 -> "w" ; B64 -> "dw"
 
-instance Display Instruction where
+instance Display (Inst Reg RegImm) where
   displayBuilder instr =
     mconcat $
     case instr of
       Binary bsz alu r ir ->
-        [displayBuilder alu, displayBuilder bsz, " ", displayBuilder r, ", ", displayRIBuilder ir]
+        [displayBuilder alu, displayBuilder bsz, " ", displayBuilder r, ", ", displayBuilder ir]
       Unary bsz alu r ->
         [displayBuilder alu, displayBuilder bsz, " ", displayBuilder r]
       Store bsz r moff ir ->
         ["st", x, memSz bsz, " ", displayMemLocBuilder r moff, ", ", src]
         where (x, src) = case ir of
-                           Left r -> ("x", displayBuilder r)
-                           Right i -> ("", displayBuilder i)
+                           R r -> ("x", displayBuilder r)
+                           Imm i -> ("", displayBuilder i)
       Load bsz dst src moff ->
         ["ldx", memSz bsz, " ", displayBuilder dst, ", ", displayMemLocBuilder src moff]
       LoadImm r c ->
@@ -60,7 +58,7 @@ instance Display Instruction where
       LoadMapFd r c ->
         ["load_map_fd ", displayBuilder r, ", ", displayBuilder c]
       JCond cmp r ir off ->
-        [displayBuilder cmp, " ", displayBuilder r, ", ", displayRIBuilder ir,
+        [displayBuilder cmp, " ", displayBuilder r, ", ", displayBuilder ir,
          ", +", displayBuilder off]
       Jmp off -> ["ja +", displayBuilder off]
       Call f -> ["call ", displayBuilder f]

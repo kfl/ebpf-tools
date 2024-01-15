@@ -22,7 +22,7 @@ parseProgram (file, line, col) s =
       Left err   -> fail $ show err
       Right prog -> return prog
   where
-    positionProgram :: P.Parsec String () [A.Instruction]
+    positionProgram :: P.Parsec String () A.Program
     positionProgram = do
       pos <- P.getPosition
       P.setPosition $

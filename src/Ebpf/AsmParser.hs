@@ -40,7 +40,7 @@ imm = lexeme number <?> "immediate constant"
     sign = (char '-' >> return negate)
            <|> (optional (char '+') >> return id)
 
-regimm = (Left <$> reg) <|> (Right <$> imm)
+regimm = (R <$> reg) <|> (Imm <$> imm)
 
 ocomma = lexeme . optional $ char ','
 
@@ -67,7 +67,7 @@ memref = between (symbol "[") (symbol "]")
 
 stores = do
   (mem_sz, bsz) <- [("b", B8), ("h", B16), ("w", B32), ("dw", B64)]
-  (x, r_or_i) <- [("x", Left <$> reg), ("", Right <$> imm)]
+  (x, r_or_i) <- [("x", R <$> reg), ("", Imm <$> imm)]
   let name = "st" ++ x ++ mem_sz
   return (name, do (r, off) <- memref
                    ocomma

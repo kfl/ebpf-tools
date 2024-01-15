@@ -39,23 +39,23 @@ test_roundtrips =
 
 examplePrograms =
   [ ("store and load a byte",
-     [ Store B8 (Reg 1) (Just 2) (Right 42)
+     [ Store B8 (Reg 1) (Just 2) (Imm 42)
      , Load B8 (Reg 0) (Reg 1) (Just 2)
      , Exit])
 
   , ("store and load a double word (64-bit)",
-     [ Store B64 (Reg 1) Nothing (Right 42)
-     , Binary B64 Add (Reg 1) (Right 8)
+     [ Store B64 (Reg 1) Nothing (Imm 42)
+     , Binary B64 Add (Reg 1) (Imm 8)
      , Load B64 (Reg 0) (Reg 1) (Just (-8))
      , Exit])
 
   , ("sum of the first five integers",
-     [ Binary B64 Mov (Reg 0) (Right 0)
-     , Binary B32 Mov (Reg 1) (Right 5)
+     [ Binary B64 Mov (Reg 0) (Imm 0)
+     , Binary B32 Mov (Reg 1) (Imm 5)
      , Jmp 2
-     , Binary B64 Add (Reg 0) (Left (Reg 1))
-     , Binary B32 Sub (Reg 1) (Right 1)
-     , JCond Jgt (Reg 1) (Right 0) (-3)
+     , Binary B64 Add (Reg 0) (R (Reg 1))
+     , Binary B32 Sub (Reg 1) (Imm 1)
+     , JCond Jgt (Reg 1) (Imm 0) (-3)
      , Exit])
 
   ]
