@@ -24,6 +24,8 @@ newtype Reg = Reg Int deriving (Eq, Show, Ord, Data)
 type Imm = Int64
 data RegImm = R Reg | Imm Imm deriving (Eq, Show, Ord, Data)
 type Offset = Int64
+type MemoryOffset = Offset
+type CodeOffset = Offset
 
 -- TODO support atomic operations
 -- TODO support absolute and indirect loads
@@ -32,13 +34,13 @@ type Offset = Int64
 data Inst reg imm regimm =
     Binary BSize BinAlu reg regimm
   | Unary BSize UnAlu reg
-  | Store BSize reg (Maybe Offset) regimm
-  | Load BSize reg reg (Maybe Offset)
+  | Store BSize reg (Maybe MemoryOffset) regimm
+  | Load BSize reg reg (Maybe MemoryOffset)
   | LoadImm reg imm
   | LoadMapFd reg imm
-  | JCond Jcmp reg regimm Offset
-  | Jmp Offset
-  | Call imm
+  | JCond Jcmp reg regimm CodeOffset
+  | Jmp CodeOffset
+  | Call CodeOffset
   | Exit
   deriving (Eq, Show, Ord, Data)
 

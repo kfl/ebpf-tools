@@ -1,3 +1,4 @@
+{-# LANGUAGE NamedFieldPuns #-}
 module Ebpf.AsmParser where
 
 import Ebpf.Asm
@@ -26,11 +27,11 @@ symbol s = lexeme $ string s
 
 operator = lexeme $ many1 alphaNum
 
-reg :: Parser u Reg
-reg = Reg . read <$> lexeme (char 'r' >> many1 digit) <?> "register"
+rawReg :: Parser u Reg
+rawReg = Reg . read <$> lexeme (char 'r' >> many1 digit) <?> "register"
 
-imm :: Parser u Int64
-imm = lexeme number <?> "immediate constant"
+rawImm :: Parser u Int64
+rawImm = lexeme number <?> "immediate constant"
   where
     number = sign <*> unsigned
     unsigned = (char '0' >> (hex <|> decimal <|> return 0))
@@ -40,11 +41,23 @@ imm = lexeme number <?> "immediate constant"
     sign = (char '-' >> return negate)
            <|> (optional (char '+') >> return id)
 
+memoryOffset = rawImm
+codeOffset = rawImm
+
+-- FIXME: we should accept Haskell identifies as splice variables
 splice = lexeme $ char '#' *> char '{' *> many1 alphaNum <* char '}'
 
+reg = do
+  S {onlyReg, varReg} <- getState
+  (onlyReg <$> rawReg) <|> (varReg <$> splice)
+
+imm = do
+  S {onlyImm, varImm} <- getState
+  (onlyImm <$> rawImm) <|> (varImm <$> splice)
+
 regimm = do
-  (spliceCon, regCon, immCon) <- getState
-  (regCon <$> reg) <|> (immCon <$> imm) <|> (spliceCon <$> splice)
+  S {vRegImm, rRegImm, iRegImm} <- getState
+  (rRegImm <$> rawReg) <|> (iRegImm <$> rawImm) <|> (vRegImm <$> splice)
 
 ocomma = lexeme . optional $ char ','
 
@@ -67,7 +80,7 @@ unAlus = do
 
 
 memref = between (symbol "[") (symbol "]")
-         ((,) <$> reg <*> optionMaybe (symbol "+" *> imm))
+         ((,) <$> reg <*> optionMaybe (symbol "+" *> memoryOffset))
 
 stores = do
   (mem_sz, bsz) <- [("b", B8), ("h", B16), ("w", B32), ("dw", B64)]
@@ -77,10 +90,10 @@ stores = do
                    ocomma
                    Store bsz r off <$> r_or_i)
   where
-    rSplice = do (spliceCon, regCon, _) <- getState
-                 (regCon <$> reg) <|> (spliceCon <$> splice)
-    iSplice = do (spliceCon, _, immCon) <- getState
-                 (immCon <$> imm) <|> (spliceCon <$> splice)
+    rSplice = do S {vRegImm, rRegImm} <- getState
+                 (rRegImm <$> rawReg) <|> (vRegImm <$> splice)
+    iSplice = do S {vRegImm, iRegImm} <- getState
+                 (iRegImm <$> rawImm) <|> (vRegImm <$> splice)
 
 loads = do
   (mem_sz, bsz) <- [("b", B8), ("h", B16), ("w", B32), ("dw", B64)]
@@ -94,8 +107,7 @@ loads = do
 conditionals = do
   jmp <- [Jeq .. Jsle]
   let name = lowercase jmp
-  return(name, JCond jmp <$> reg <* ocomma <*> regimm <* ocomma <*> (symbol "+" *> imm)) -- TODO: Do we really want to require the '+' here?
-
+  return(name, JCond jmp <$> reg <* ocomma <*> regimm <* ocomma <*> (symbol "+" *> codeOffset)) -- TODO: Do we really want to require the '+' here?
 
 instruction = do
   opr <- operator
@@ -108,20 +120,36 @@ instruction = do
                              stores ++
                              loads ++ [ ("lddw", LoadImm <$> reg <* ocomma <*> imm)] ++
                              conditionals ++
-                             [ ("ja", Jmp <$> imm),
-                               ("jmp", Jmp <$> imm),
-                               ("call", Call <$> imm),
+                             [ ("ja", Jmp <$> codeOffset),
+                               ("jmp", Jmp <$> codeOffset),
+                               ("call", Call <$> codeOffset),
                                ("exit", pure Exit)]
 
 
 program = sc >> many1 instruction <* eof
 
-defaultCons = (error "Splices not allowed", R, Imm)
+data SpliceConstructors reg imm regimm = S { onlyReg :: Reg -> reg
+                                           , varReg :: String -> reg
+                                           , onlyImm :: Imm -> imm
+                                           , varImm :: String -> imm
+                                           , rRegImm :: Reg -> regimm
+                                           , iRegImm :: Imm -> regimm
+                                           , vRegImm :: String -> regimm
+                                           }
+defaultSpliceCons =
+  S { onlyReg = id
+    , varReg = don't
+    , onlyImm = id
+    , varImm = don't
+    , rRegImm = R
+    , iRegImm = Imm
+    , vRegImm = don't }
+  where don't = error "Splices not allowed"
 
 parse :: String -> Either String Program
-parse str = first show $ runParser program defaultCons "<input>" str
+parse str = first show $ runParser program defaultSpliceCons "<input>" str
 
 parseFromFile :: FilePath -> IO (Either String Program)
 parseFromFile filename = first show <$> do
   input <- readFile filename
-  return $ runParser program defaultCons filename input
+  return $ runParser program defaultSpliceCons filename input
