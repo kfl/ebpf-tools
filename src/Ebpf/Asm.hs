@@ -29,20 +29,20 @@ type Offset = Int64
 -- TODO support absolute and indirect loads
 -- TODO support tail calls
 
-data Inst reg regimm =
+data Inst reg imm regimm =
     Binary BSize BinAlu reg regimm
   | Unary BSize UnAlu reg
   | Store BSize reg (Maybe Offset) regimm
   | Load BSize reg reg (Maybe Offset)
-  | LoadImm reg Imm
-  | LoadMapFd reg Imm
+  | LoadImm reg imm
+  | LoadMapFd reg imm
   | JCond Jcmp reg regimm Offset
   | Jmp Offset
-  | Call Imm
+  | Call imm
   | Exit
   deriving (Eq, Show, Ord, Data)
 
-type Instruction = Inst Reg RegImm
+type Instruction = Inst Reg Imm RegImm
 
 type Program = [Instruction]
 

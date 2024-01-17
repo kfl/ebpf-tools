@@ -38,7 +38,7 @@ displayMemLocBuilder r moff = mconcat ["[", displayBuilder r, off, "]"]
 
 memSz = \case B8 -> "b" ; B16 -> "h" ; B32 -> "w" ; B64 -> "dw"
 
-instance Display (Inst Reg RegImm) where
+instance Display (Inst Reg Imm RegImm) where
   displayBuilder instr =
     mconcat $
     case instr of

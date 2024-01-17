@@ -9,27 +9,27 @@ import Data.Bifunctor (first)
 
 import Text.Parsec
 import qualified Text.Parsec as PS
-import qualified Text.Parsec.String as PS
 
-type Parser a = PS.Parser a
+type Parser u a = Parsec String u a
 
-ignore :: Parser a -> Parser ()
+ignore :: Parser u a -> Parser u ()
 ignore p = p >> return ()
 
 comment = ignore $ char ';' >> manyTill anyChar (try endOfLine)
 
 sc = skipMany (comment <|> ignore space)
-lexeme :: Parser a -> Parser a
+
+lexeme :: Parser u a -> Parser u a
 lexeme p = p <* sc
 
 symbol s = lexeme $ string s
 
 operator = lexeme $ many1 alphaNum
 
-reg :: Parser Reg
+reg :: Parser u Reg
 reg = Reg . read <$> lexeme (char 'r' >> many1 digit) <?> "register"
 
-imm :: Parser Int64
+imm :: Parser u Int64
 imm = lexeme number <?> "immediate constant"
   where
     number = sign <*> unsigned
@@ -40,7 +40,11 @@ imm = lexeme number <?> "immediate constant"
     sign = (char '-' >> return negate)
            <|> (optional (char '+') >> return id)
 
-regimm = (R <$> reg) <|> (Imm <$> imm)
+splice = lexeme $ char '#' *> char '{' *> many1 alphaNum <* char '}'
+
+regimm = do
+  (spliceCon, regCon, immCon) <- getState
+  (regCon <$> reg) <|> (immCon <$> imm) <|> (spliceCon <$> splice)
 
 ocomma = lexeme . optional $ char ','
 
@@ -67,11 +71,16 @@ memref = between (symbol "[") (symbol "]")
 
 stores = do
   (mem_sz, bsz) <- [("b", B8), ("h", B16), ("w", B32), ("dw", B64)]
-  (x, r_or_i) <- [("x", R <$> reg), ("", Imm <$> imm)]
+  (x, r_or_i) <- [("x", rSplice), ("", iSplice)]
   let name = "st" ++ x ++ mem_sz
   return (name, do (r, off) <- memref
                    ocomma
                    Store bsz r off <$> r_or_i)
+  where
+    rSplice = do (spliceCon, regCon, _) <- getState
+                 (regCon <$> reg) <|> (spliceCon <$> splice)
+    iSplice = do (spliceCon, _, immCon) <- getState
+                 (immCon <$> imm) <|> (spliceCon <$> splice)
 
 loads = do
   (mem_sz, bsz) <- [("b", B8), ("h", B16), ("w", B32), ("dw", B64)]
@@ -107,8 +116,12 @@ instruction = do
 
 program = sc >> many1 instruction <* eof
 
-parse :: String -> Either String Program
-parse str = first show $ PS.parse program "<input>" str
+defaultCons = (error "Splices not allowed", R, Imm)
 
-parseFromFile :: FilePath -> IO(Either String Program)
-parseFromFile filename = first show <$> PS.parseFromFile program filename
+parse :: String -> Either String Program
+parse str = first show $ runParser program defaultCons "<input>" str
+
+parseFromFile :: FilePath -> IO (Either String Program)
+parseFromFile filename = first show <$> do
+  input <- readFile filename
+  return $ runParser program defaultCons filename input
