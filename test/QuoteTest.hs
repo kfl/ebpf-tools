@@ -113,7 +113,7 @@ test_basic =
       p [ Store B8 (Reg 1) (Just 2) n
         , Exit]
 
-  , testCase "Splice reg in memory referece" $
+  , testCase "Splice reg in memory reference" $
       let r = Reg 1 in
       [ebpf| stxb [#{r} + 2], r0
              exit
@@ -122,12 +122,12 @@ test_basic =
       p [ Store B8 r (Just 2) (R $ Reg 0)
         , Exit]
 
-  , testCase "Parsing of reasonable splice variable" $
+  , testCase "Parsing of reasonable splice variables" $
      parseWithSpliceVars Parser.program "mov #{r'}, #{a_38}"
      @?=
      Right [Binary B64 Mov (Var "r'") (Var "a_38")]
 
-  , testCase "Splice some reasonable variable name" $
+  , testCase "Splice some reasonable variable names" $
       let r' = Reg 1
           a_38 = Reg 0
       in
