@@ -1,4 +1,4 @@
-{-# LANGUAGE LambdaCase, DeriveDataTypeable, NamedFieldPuns, DisambiguateRecordFields #-}
+{-# LANGUAGE LambdaCase, DeriveDataTypeable, NamedFieldPuns #-}
 module Ebpf.Quote (ebpf) where
 
 import qualified Language.Haskell.TH as TH
@@ -22,16 +22,13 @@ ebpf = QuasiQuoter { quoteExp = quoteEbpfPrograms
 
 quoteEbpfPrograms :: String -> TH.ExpQ
 quoteEbpfPrograms s = do
-  loc <- location'
-  prog <- parseProgram loc s
+  pos <- locToPos <$> TH.location
+  prog <- parseWithSpliceVars (P.setPosition pos *> Parser.program) s
   THS.dataToExpQ (const Nothing `Gen.extQ` (qqSpliceVar :: Splicer RegImm)
                                 `Gen.extQ` (qqSpliceVar :: Splicer Reg)
                                 `Gen.extQ` (qqSpliceVar :: Splicer Imm)) prog
-
-location' :: TH.Q P.SourcePos
-location' = aux <$> TH.location
   where
-    aux loc = uncurry (P.newPos (TH.loc_filename loc)) (TH.loc_start loc)
+    locToPos loc = uncurry (P.newPos (TH.loc_filename loc)) (TH.loc_start loc)
 
 data SpliceVar a = Var String | Concrete a
   deriving (Eq, Show, Data)
@@ -43,14 +40,15 @@ qqSpliceVar = \case
   Var v -> Just $ TH.varE (TH.mkName v)
   Concrete x -> Just $ THS.liftData x
 
-parseProgram :: MonadFail m => P.SourcePos -> String ->
-                m [Inst (SpliceVar Reg) (SpliceVar Imm) (SpliceVar RegImm)]
-parseProgram pos s =
-  case P.runParser positionedProgram quotationCons (P.sourceName pos) s of
-    Left err   -> fail $ show err
-    Right prog -> return prog
+parseWithSpliceVars :: MonadFail m =>
+                       Parser.Parser (SpliceConstructors (SpliceVar Reg)
+                                                         (SpliceVar Imm)
+                                                         (SpliceVar RegImm)) a
+                    -> String
+                    -> m a
+parseWithSpliceVars parser str =
+  either (fail . show) return $ P.runParser parser quotationCons "" str
   where
-    positionedProgram = P.setPosition pos *> Parser.program
     S {onlyReg, onlyImm, rRegImm, iRegImm} = Parser.defaultSpliceCons
     quotationCons = S { onlyReg = Concrete . onlyReg
                       , varReg = Var

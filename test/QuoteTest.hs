@@ -121,7 +121,6 @@ test_basic =
       p [ Store B8 r (Just 2) (R $ Reg 0)
         , Exit]
 
-
       ]
 
 p :: Program -> Program
