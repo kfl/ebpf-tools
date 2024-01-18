@@ -23,12 +23,13 @@ ebpf = QuasiQuoter { quoteExp = quoteEbpfPrograms
 quoteEbpfPrograms :: String -> TH.ExpQ
 quoteEbpfPrograms s = do
   pos <- locToPos <$> TH.location
-  prog <- parseWithSpliceVars (P.setPosition pos *> Parser.program) s
+  prog <- eitherToQ $ parseWithSpliceVars (P.setPosition pos *> Parser.program) s
   THS.dataToExpQ (const Nothing `Gen.extQ` (qqSpliceVar :: Splicer RegImm)
                                 `Gen.extQ` (qqSpliceVar :: Splicer Reg)
                                 `Gen.extQ` (qqSpliceVar :: Splicer Imm)) prog
   where
     locToPos loc = uncurry (P.newPos (TH.loc_filename loc)) (TH.loc_start loc)
+    eitherToQ = either (fail . show) return
 
 data SpliceVar a = Var String | Concrete a
   deriving (Eq, Show, Data)
@@ -40,14 +41,12 @@ qqSpliceVar = \case
   Var v -> Just $ TH.varE (TH.mkName v)
   Concrete x -> Just $ THS.liftData x
 
-parseWithSpliceVars :: MonadFail m =>
-                       Parser.Parser (SpliceConstructors (SpliceVar Reg)
+parseWithSpliceVars :: Parser.Parser (SpliceConstructors (SpliceVar Reg)
                                                          (SpliceVar Imm)
                                                          (SpliceVar RegImm)) a
                     -> String
-                    -> m a
-parseWithSpliceVars parser str =
-  either (fail . show) return $ P.runParser parser quotationCons "" str
+                    -> Either P.ParseError a
+parseWithSpliceVars parser str = P.runParser parser quotationCons "" str
   where
     S {onlyReg, onlyImm, rRegImm, iRegImm} = Parser.defaultSpliceCons
     quotationCons = S { onlyReg = Concrete . onlyReg
