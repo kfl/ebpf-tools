@@ -121,7 +121,6 @@ test_basic =
       p [ Store B8 r (Just 2) (R $ Reg 0)
         , Exit]
 
-
   , testCase "Splice some reasonable names (currently failing)" $
       let r' = Reg 1
           a_38 = Reg 0
@@ -135,8 +134,9 @@ test_basic =
         , Binary B64 Mov a_38 (Imm 42)
         , Exit]
 
-
       ]
 
+
+-- A hack to resolve the type of all the (integer) literals
 p :: Program -> Program
 p = id
