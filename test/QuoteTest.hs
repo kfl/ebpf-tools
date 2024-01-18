@@ -122,7 +122,7 @@ test_basic =
       p [ Store B8 r (Just 2) (R $ Reg 0)
         , Exit]
 
-  , testCase "Parsing of reasonable splice variable" $
+  , testCase "Parsing of reasonable splice variable (currently failing)" $
      parseWithSpliceVars Parser.program "mov #{r'}, #{a_38}"
      @?=
      Right [Binary B64 Mov (Var "r'") (Var "a_38")]
