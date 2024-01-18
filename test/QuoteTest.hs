@@ -121,6 +121,10 @@ test_basic =
       p [ Store B8 r (Just 2) (R $ Reg 0)
         , Exit]
 
+  -- This test currently gives a parse error, thus it prevents all
+  -- tests from running.  Maybe that is a hint that the `Quote` module
+  -- ought to export the quasi-quoter parser as well so that it can be
+  -- tested separately.
   , testCase "Splice some reasonable names (currently failing)" $
       let r' = Reg 1
           a_38 = Reg 0
