@@ -1,11 +1,15 @@
 {-# LANGUAGE LambdaCase, DeriveDataTypeable, NamedFieldPuns #-}
-module Ebpf.Quote (ebpf) where
+module Ebpf.Quote (
+  ebpf,
+  parseWithSpliceVars,
+  SpliceVar(..)
+) where
 
-import qualified Language.Haskell.TH as TH
-import qualified Language.Haskell.TH.Syntax as THS
-import Language.Haskell.TH.Quote
-import qualified Data.Generics as Gen
 import Data.Data
+import qualified Data.Generics as Gen
+import qualified Language.Haskell.TH as TH
+import Language.Haskell.TH.Quote
+import qualified Language.Haskell.TH.Syntax as THS
 
 import Ebpf.Asm
 import qualified Ebpf.AsmParser as Parser
