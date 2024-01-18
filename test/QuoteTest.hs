@@ -122,26 +122,23 @@ test_basic =
       p [ Store B8 r (Just 2) (R $ Reg 0)
         , Exit]
 
-  , testCase "Parsing of reasonable splice variable (currently failing)" $
+  , testCase "Parsing of reasonable splice variable" $
      parseWithSpliceVars Parser.program "mov #{r'}, #{a_38}"
      @?=
      Right [Binary B64 Mov (Var "r'") (Var "a_38")]
 
-  -- This test currently gives a parse error, thus it prevents all
-  -- tests from running. Thus it commented out for now
-  --
-  -- , testCase "Splice some reasonable names (currently failing)" $
-  --     let r' = Reg 1
-  --         a_38 = Reg 0
-  --     in
-  --     [ebpf| mov #{r'}, 0
-  --            mov #{a_38}, 42
-  --            exit
-  --            |]
-  --     @?=
-  --     p [ Binary B64 Mov r' (Imm 0)
-  --       , Binary B64 Mov a_38 (Imm 42)
-  --       , Exit]
+  , testCase "Splice some reasonable variable name" $
+      let r' = Reg 1
+          a_38 = Reg 0
+      in
+      [ebpf| mov #{r'}, 0
+             mov #{a_38}, 42
+             exit
+             |]
+      @?=
+      p [ Binary B64 Mov r' (Imm 0)
+        , Binary B64 Mov a_38 (Imm 42)
+        , Exit]
 
       ]
 

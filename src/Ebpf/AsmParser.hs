@@ -44,8 +44,8 @@ rawImm = lexeme number <?> "immediate constant"
 memoryOffset = rawImm
 codeOffset = rawImm
 
--- FIXME: we should accept Haskell identifies as splice variables
-splice = lexeme $ char '#' *> char '{' *> many1 alphaNum <* char '}'
+splice = lexeme $ char '#' *> char '{' *> ident <* char '}'
+  where ident = (:) <$> letter <*> (many (alphaNum <|> oneOf "_'"))
 
 reg = do
   S {onlyReg, varReg} <- getState
