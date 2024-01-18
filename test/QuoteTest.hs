@@ -121,6 +121,21 @@ test_basic =
       p [ Store B8 r (Just 2) (R $ Reg 0)
         , Exit]
 
+
+  , testCase "Splice some reasonable names (currently failing)" $
+      let r' = Reg 1
+          a_38 = Reg 0
+      in
+      [ebpf| mov #{r'}, 0
+             mov #{a_38}, 42
+             exit
+             |]
+      @?=
+      p [ Binary B64 Mov r' (Imm 0)
+        , Binary B64 Mov a_38 (Imm 42)
+        , Exit]
+
+
       ]
 
 p :: Program -> Program
