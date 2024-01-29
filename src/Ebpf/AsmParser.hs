@@ -128,6 +128,7 @@ instruction = do
 
 program = sc >> many1 instruction <* eof
 
+-- TODO the naming of the splice stuff is clunky
 data SpliceConstructors reg imm regimm = S { onlyReg :: Reg -> reg
                                            , varReg :: String -> reg
                                            , onlyImm :: Imm -> imm
