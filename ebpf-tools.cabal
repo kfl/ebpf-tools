@@ -9,6 +9,7 @@ author:          Ken Friis Larsen
 homepage:        https://github.com/kfl/ebpf-tools
 bug-reports:     https://github.com/kfl/ebpf-tools/issues
 synopsis:        Assembler and disassembler for eBPF bytecode
+tested-with:     GHC == 9.4.7, GHC == 9.6.3, GHC == 9.8.1
 extra-doc-files:
     README.md
     CHANGELOG.md
@@ -16,6 +17,8 @@ extra-doc-files:
 source-repository head
     type:     git
     location: https://github.com/kfl/ebpf-tools.git
+
+
 
 common common-deps
     build-depends:
