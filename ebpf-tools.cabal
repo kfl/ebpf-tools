@@ -1,6 +1,6 @@
 cabal-version:   3.4
 name:            ebpf-tools
-version:         0.1.0.0
+version:         0.2.0.0
 license:         MIT
 license-file:    LICENSE
 copyright:       2022-2024 Ken Friis Larsen
