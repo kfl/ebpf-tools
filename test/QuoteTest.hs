@@ -140,6 +140,12 @@ test_basic =
         , Binary B64 Mov a_38 (Imm 42)
         , Exit]
 
+  , testCase "Splice in some map fd" $
+      let map_fd = 2 in
+        [ebpf| lmfd r1, #{map_fd} |]
+      @?=
+      p [LoadMapFd (Reg 1) map_fd ]
+
       ]
 
 

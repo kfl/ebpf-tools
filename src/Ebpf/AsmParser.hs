@@ -119,6 +119,7 @@ instruction = do
                              unAlus ++
                              stores ++
                              loads ++ [ ("lddw", LoadImm <$> reg <* ocomma <*> imm)] ++
+                             [ ("lmfd", LoadMapFd <$> reg <* ocomma <*> imm) ] ++
                              conditionals ++
                              [ ("ja", Jmp <$> codeOffset),
                                ("jmp", Jmp <$> codeOffset),
