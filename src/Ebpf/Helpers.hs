@@ -144,6 +144,24 @@ ldxb dst src off = Load B8 dst src (memOffset off)
 ldxdw :: Reg -> Reg -> Offset16 -> Instruction
 ldxdw dst src off = Load B64 dst src (memOffset off)
 
+ldabsw :: Imm32 -> Instruction
+ldabsw imm = LoadAbs B32 $ fromIntegral imm
+ldabsh :: Imm32 -> Instruction
+ldabsh imm = LoadAbs B16 $ fromIntegral imm
+ldabsb :: Imm32 -> Instruction
+ldabsb imm = LoadAbs B8 $ fromIntegral imm
+ldabsdw :: Imm32 -> Instruction
+ldabsdw imm = LoadAbs B64 $ fromIntegral imm
+
+ldindw :: Reg -> Imm32 -> Instruction
+ldindw src imm = LoadInd B32 src $ fromIntegral imm
+ldindh :: Reg -> Imm32 -> Instruction
+ldindh src imm = LoadInd B16 src $ fromIntegral imm
+ldindb :: Reg -> Imm32 -> Instruction
+ldindb src imm = LoadInd B8 src $ fromIntegral imm
+ldinddw :: Reg -> Imm32 -> Instruction
+ldinddw src imm = LoadInd B64 src $ fromIntegral imm
+
 stw :: Reg -> Offset16 -> Imm32 -> Instruction
 stw dst off imm = Store B32 dst (memOffset off) (Imm $ fromIntegral imm)
 sth :: Reg -> Offset16 -> Imm32 -> Instruction

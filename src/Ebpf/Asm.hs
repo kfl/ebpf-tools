@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 module Ebpf.Asm where
 
-import Data.Int (Int64)
+import Data.Int (Int64, Int32)
 import Data.Foldable (asum)
 import Data.Data
 
@@ -26,12 +26,13 @@ data RegImm = R Reg | Imm Imm deriving (Eq, Show, Ord, Data)
 type Offset = Int64
 type MemoryOffset = Offset
 type CodeOffset = Offset
+type HelperId = Int32
 
 -- TODO support atomic operations
 -- TODO support absolute and indirect loads
 -- TODO support tail calls
 
-data Inst reg imm regimm =
+data Inst reg imm regimm extern =
     Binary BSize BinAlu reg regimm
   | Unary BSize UnAlu reg
   | Store BSize reg (Maybe MemoryOffset) regimm
@@ -39,13 +40,14 @@ data Inst reg imm regimm =
   | LoadImm reg imm
   | LoadMapFd reg imm
   | LoadAbs BSize imm
+  | LoadInd BSize reg imm
   | JCond Jcmp reg regimm CodeOffset
   | Jmp CodeOffset
-  | Call CodeOffset
+  | Call extern
   | Exit
   deriving (Eq, Show, Ord, Data)
 
-type Instruction = Inst Reg Imm RegImm
+type Instruction = Inst Reg Imm RegImm HelperId
 
 type Program = [Instruction]
 
@@ -74,7 +76,8 @@ wellformed instrs = asum $ fmap wfInst instrs
         Load _ dst src off -> asum [wfReg dst, off >>= wfOffset, wfReg src]
         LoadImm dst _ -> wfReg dst
         LoadMapFd dst _ -> wfReg dst
-
+        LoadAbs _ _ -> Nothing -- should immediate be checked?
+        LoadInd _ src _ -> wfReg src
         -- TODO check that off is within bounds
         JCond _ lhs rhs off -> asum [wfReg lhs, wfRegImm rhs, wfOffset off]
         Jmp off -> wfOffset off

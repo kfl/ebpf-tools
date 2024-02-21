@@ -5,7 +5,7 @@ import Ebpf.Asm
 import qualified Data.Char as C
 import qualified Data.Map.Strict as M
 import Data.Map.Strict (Map)
-import Data.Int (Int64)
+import Data.Int (Int64, Int32)
 import Data.Bifunctor (first)
 
 import Text.Parsec
@@ -44,6 +44,17 @@ rawImm = lexeme number <?> "immediate constant"
 memoryOffset = rawImm
 codeOffset = rawImm
 
+rawImm32 :: Parser u Int32
+rawImm32 = lexeme number <?> "extern function"
+  where
+    number = sign <*> unsigned
+    unsigned = (char '0' >> (hex <|> decimal <|> return 0))
+               <|> decimal
+    hex = read . ("0x" ++) <$> (oneOf "Xx" >> many1 hexDigit)
+    decimal = read <$> many1 digit
+    sign = (char '-' >> return negate)
+           <|> (optional (char '+') >> return id)
+
 splice = lexeme $ char '#' *> char '{' *> ident <* char '}'
   where ident = (:) <$> letter <*> (many (alphaNum <|> oneOf "_'"))
 
@@ -58,6 +69,10 @@ imm = do
 regimm = do
   S {vRegImm, rRegImm, iRegImm} <- getState
   (rRegImm <$> rawReg) <|> (iRegImm <$> rawImm) <|> (vRegImm <$> splice)
+
+extern = do
+  S {iHelperId, vHelperId} <- getState
+  (iHelperId <$> rawImm32) <|> (vHelperId <$> splice)
 
 ocomma = lexeme . optional $ char ','
 
@@ -109,6 +124,14 @@ ldabs = do
   return (name, do off <- imm
                    return $ LoadAbs bsz off)
 
+ldind = do
+  (mem_sz, bsz) <- [("b", B8), ("h", B16), ("w", B32), ("dw", B64)]
+  let name = "ldind" ++ mem_sz
+  return (name, do src <- reg
+                   ocomma
+                   off <- imm
+                   return $ LoadInd bsz src off)
+
 conditionals = do
   jmp <- [Jeq .. Jsle]
   let name = lowercase jmp
@@ -126,29 +149,34 @@ instruction = do
                              loads ++ [ ("lddw", LoadImm <$> reg <* ocomma <*> imm)] ++
                              [ ("lmfd", LoadMapFd <$> reg <* ocomma <*> imm) ] ++
                              ldabs ++
+                             ldind ++
                              conditionals ++
                              [ ("ja", Jmp <$> codeOffset),
                                ("jmp", Jmp <$> codeOffset),
-                               ("call", Call <$> codeOffset), -- TODO: splicing in helper funs
+                               ("call", Call <$> extern),
                                ("exit", pure Exit)]
 
 
 program = sc >> many1 instruction <* eof
 
 -- TODO the naming of the splice stuff is clunky
-data SpliceConstructors reg imm regimm = S { onlyReg :: Reg -> reg
-                                           , varReg :: String -> reg
-                                           , onlyImm :: Imm -> imm
-                                           , varImm :: String -> imm
-                                           , rRegImm :: Reg -> regimm
-                                           , iRegImm :: Imm -> regimm
-                                           , vRegImm :: String -> regimm
-                                           }
+data SpliceConstructors reg imm regimm extern = S { onlyReg :: Reg -> reg
+                                                  , varReg :: String -> reg
+                                                  , onlyImm :: Imm -> imm
+                                                  , varImm :: String -> imm
+                                                  , iHelperId :: HelperId -> extern
+                                                  , vHelperId :: String -> extern
+                                                  , rRegImm :: Reg -> regimm
+                                                  , iRegImm :: Imm -> regimm
+                                                  , vRegImm :: String -> regimm
+                                                  }
 defaultSpliceCons =
   S { onlyReg = id
     , varReg = don't
     , onlyImm = id
     , varImm = don't
+    , iHelperId = id
+    , vHelperId = don't
     , rRegImm = R
     , iRegImm = Imm
     , vRegImm = don't }

@@ -30,7 +30,8 @@ quoteEbpfPrograms s = do
   prog <- eitherToQ $ parseWithSpliceVars (P.setPosition pos *> Parser.program) s
   THS.dataToExpQ (const Nothing `Gen.extQ` (qqSpliceVar :: Splicer RegImm)
                                 `Gen.extQ` (qqSpliceVar :: Splicer Reg)
-                                `Gen.extQ` (qqSpliceVar :: Splicer Imm)) prog
+                                `Gen.extQ` (qqSpliceVar :: Splicer Imm)
+                                `Gen.extQ` (qqSpliceVar :: Splicer HelperId)) prog
   where
     locToPos loc = uncurry (P.newPos (TH.loc_filename loc)) (TH.loc_start loc)
     eitherToQ = either (fail . show) return
@@ -47,16 +48,19 @@ qqSpliceVar = \case
 
 parseWithSpliceVars :: Parser.Parser (SpliceConstructors (SpliceVar Reg)
                                                          (SpliceVar Imm)
-                                                         (SpliceVar RegImm)) a
+                                                         (SpliceVar RegImm)
+                                                         (SpliceVar HelperId)) a
                     -> String
                     -> Either P.ParseError a
 parseWithSpliceVars parser str = P.runParser parser quotationCons "" str
   where
-    S {onlyReg, onlyImm, rRegImm, iRegImm} = Parser.defaultSpliceCons
+    S {onlyReg, onlyImm, rRegImm, iRegImm, iHelperId} = Parser.defaultSpliceCons
     quotationCons = S { onlyReg = Concrete . onlyReg
                       , varReg = Var
                       , onlyImm = Concrete . onlyImm
                       , varImm = Var
+                      , iHelperId = Concrete . iHelperId
+                      , vHelperId = Var
                       , vRegImm = Var
                       , rRegImm = Concrete . rRegImm
                       , iRegImm = Concrete . iRegImm

@@ -38,7 +38,7 @@ displayMemLocBuilder r moff = mconcat ["[", displayBuilder r, off, "]"]
 
 memSz = \case B8 -> "b" ; B16 -> "h" ; B32 -> "w" ; B64 -> "dw"
 
-instance Display (Inst Reg Imm RegImm) where
+instance Display (Inst Reg Imm RegImm HelperId) where
   displayBuilder instr =
     mconcat $
     case instr of
@@ -57,6 +57,10 @@ instance Display (Inst Reg Imm RegImm) where
         ["lddw ", displayBuilder r, ", ", displayBuilder c]
       LoadMapFd r c ->
         ["load_map_fd ", displayBuilder r, ", ", displayBuilder c]
+      LoadAbs bsz i ->
+        ["ldabs", memSz bsz, " ", displayBuilder i]
+      LoadInd bsz src i ->
+        ["ldind", memSz bsz, " ", displayBuilder src, " ", displayBuilder i]
       JCond cmp r ir off ->
         [displayBuilder cmp, " ", displayBuilder r, ", ", displayBuilder ir,
          ", +", displayBuilder off]

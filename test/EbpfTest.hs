@@ -58,4 +58,15 @@ examplePrograms =
      , JCond Jgt (Reg 1) (Imm 0) (-3)
      , Exit])
 
+  , ("absolute load",
+     [ Binary B64 Mov (Reg 6) (R (Reg 1))
+     , LoadAbs B32 0
+     , Exit])
+
+  , ("indirect load",
+     [ Binary B64 Mov (Reg 6) (R (Reg 1))
+     , Binary B64 Mov (Reg 2) (Imm 4)
+     , LoadInd B32 (Reg 2) 0
+     , Exit])
+
   ]

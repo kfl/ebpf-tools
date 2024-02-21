@@ -69,4 +69,34 @@ test_basic =
       Right [ Binary B64 Mov (Reg 6) (R (Reg 1))
             , LoadAbs B32 0
             , Exit]
+
+  , testCase "loads a ctx using ld_ind" $
+      parse [r|
+              mov r6, r1
+              mov r2, 4
+              ldindw r2, 0
+              exit
+              |]
+      @?=
+      Right [ Binary B64 Mov (Reg 6) (R (Reg 1))
+            , Binary B64 Mov (Reg 2) (Imm 4)
+            , LoadInd B32 (Reg 2) 0
+            , Exit]
+
+  , testCase "calls bpf-helper function" $
+      parse [r|
+              mov r1, 1
+              mov r2, r10
+              add r2, -4
+              stw [r2], 0x2a
+              call 0 ;; 0 = map lookup
+              exit
+              |]
+      @?=
+      Right [ Binary B64 Mov (Reg 1) (Imm 1)
+            , Binary B64 Mov (Reg 2) (R (Reg 10))
+            , Binary B64 Add (Reg 2) (Imm (-4))
+            , Store B32 (Reg 2) Nothing (Imm 42)
+            , Call 0
+            , Exit]
   ]

@@ -98,6 +98,14 @@ instr = do
     _ | opc == E.c_LD_H_REG -> return $ H.ldxh dst src off
     _ | opc == E.c_LD_W_REG -> return $ H.ldxw dst src off
     _ | opc == E.c_LD_DW_REG -> return $ H.ldxdw dst src off
+    _ | opc == E.c_LD_ABS_B -> return $ H.ldabsb $ fromIntegral imm
+    _ | opc == E.c_LD_ABS_H -> return $ H.ldabsh $ fromIntegral imm
+    _ | opc == E.c_LD_ABS_W -> return $ H.ldabsw $ fromIntegral imm
+    _ | opc == E.c_LD_ABS_DW -> return $ H.ldabsdw $ fromIntegral imm
+    _ | opc == E.c_LD_IND_B -> return $ H.ldindb src $ fromIntegral imm
+    _ | opc == E.c_LD_IND_H -> return $ H.ldindh src $ fromIntegral imm
+    _ | opc == E.c_LD_IND_W -> return $ H.ldindw src $ fromIntegral imm
+    _ | opc == E.c_LD_IND_DW -> return $ H.ldinddw src $ fromIntegral imm
     _ | opc == E.c_ST_B_IMM -> return $ H.stb dst off imm
     _ | opc == E.c_ST_H_IMM -> return $ H.sth dst off imm
     _ | opc == E.c_ST_W_IMM -> return $ H.stw dst off imm

@@ -96,7 +96,15 @@ encLoad bs (Reg dst) (Reg src) off = instr (c_BPF_MEM .|. c_BPF_LDX .|. bbs) (w8
             B64 -> c_BPF_DW
     boff = maybe 0 w16 off
 
-encLabs bs (Imm imm) = instr (c_BPF_ABS .|. bbs .|. c_BPF_LD) 0 0 0 (w32 imm)
+encLabs bs imm = instr (c_BPF_ABS .|. bbs .|. c_BPF_LD) 0 0 0 (w32 imm)
+  where
+    bbs = case bs of
+            B8 -> c_BPF_B
+            B16 -> c_BPF_H
+            B32 -> c_BPF_W
+            B64 -> c_BPF_DW
+
+encLind bs (Reg src) imm = instr (c_BPF_IND .|. bbs .|. c_BPF_LD) 0 (w8 src) 0 (w32 imm)
   where
     bbs = case bs of
             B8 -> c_BPF_B
@@ -133,6 +141,8 @@ encInstruction inst =
                              instr 0 0 0 0 (w32 (imm `shiftR` 32))
     LoadMapFd (Reg dst) imm -> instr c_LD_DW_IMM (w8 dst) c_BPF_PSEUDO_MAP_FD 0 (w32 imm) <>
                                instr 0 0 0 0 (w32 (imm `shiftR` 32))
+    LoadAbs bs imm -> encLabs bs imm
+    LoadInd bs src imm -> encLind bs src imm
     JCond jcmp dst src off -> encJCond jcmp dst src off
     Jmp off -> instr c_JA 0 0 (w16 off) 0
     Call imm -> instr c_CALL 0 0 0 (w32 imm)

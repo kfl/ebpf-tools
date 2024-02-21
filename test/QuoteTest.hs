@@ -144,13 +144,21 @@ test_basic =
       let map_fd = 2 in
         [ebpf| lmfd r1, #{map_fd} |]
       @?=
-      p [LoadMapFd (Reg 1) map_fd ]
+      p [ LoadMapFd (Reg 1) map_fd ]
 
   , testCase "Splice in value in ldabs" $
       let val = 42 in
         [ebpf| ldabsw #{val} |]
       @?=
-      p [LoadAbs B32 val ]
+      p [ LoadAbs B32 val ]
+
+  , testCase "Splice in function in call" $
+      let v_BPF_MAP_LOOKUP_ELEM = 0 in
+        [ebpf| call #{v_BPF_MAP_LOOKUP_ELEM}
+               exit |]
+      @?=
+      p [ Call v_BPF_MAP_LOOKUP_ELEM
+        , Exit ]
 
       ]
 
