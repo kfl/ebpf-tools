@@ -58,4 +58,15 @@ test_basic =
       Right [ Store B8 (Reg 1) (Just 2) (Imm 42)
             , Load B8 (Reg 0) (Reg 1) (Just 2)
             , Exit]
+
+  , testCase "loads a ctx using ld_abs" $
+      parse [r|
+              mov r6, r1
+              ldabsw 0
+              exit
+              |]
+      @?=
+      Right [ Binary B64 Mov (Reg 6) (R (Reg 1))
+            , LoadAbs B32 0
+            , Exit]
   ]

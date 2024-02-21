@@ -96,6 +96,14 @@ encLoad bs (Reg dst) (Reg src) off = instr (c_BPF_MEM .|. c_BPF_LDX .|. bbs) (w8
             B64 -> c_BPF_DW
     boff = maybe 0 w16 off
 
+encLabs bs (Imm imm) = instr (c_BPF_ABS .|. bbs .|. c_BPF_LD) 0 0 0 (w32 imm)
+  where
+    bbs = case bs of
+            B8 -> c_BPF_B
+            B16 -> c_BPF_H
+            B32 -> c_BPF_W
+            B64 -> c_BPF_DW
+
 encJCond jcmp (Reg dst) src off = instr (c_BPF_JMP .|. bmod .|. bjcmp) (w8 dst) bsrc (w16 off) bimm
   where
     (bmod, bsrc, bimm) = case src of

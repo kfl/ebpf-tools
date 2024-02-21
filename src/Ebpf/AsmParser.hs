@@ -103,6 +103,11 @@ loads = do
                    (src, off) <- memref
                    return $ Load bsz dst src off)
 
+ldabs = do
+  (mem_sz, bsz) <- [("b", B8), ("h", B16), ("w", B32), ("dw", B64)]
+  let name = "ldabs" ++ mem_sz
+  return (name, do off <- imm
+                   return $ LoadAbs bsz off)
 
 conditionals = do
   jmp <- [Jeq .. Jsle]
@@ -120,10 +125,11 @@ instruction = do
                              stores ++
                              loads ++ [ ("lddw", LoadImm <$> reg <* ocomma <*> imm)] ++
                              [ ("lmfd", LoadMapFd <$> reg <* ocomma <*> imm) ] ++
+                             ldabs ++
                              conditionals ++
                              [ ("ja", Jmp <$> codeOffset),
                                ("jmp", Jmp <$> codeOffset),
-                               ("call", Call <$> codeOffset),
+                               ("call", Call <$> codeOffset), -- TODO: splicing in helper funs
                                ("exit", pure Exit)]
 
 

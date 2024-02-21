@@ -146,6 +146,12 @@ test_basic =
       @?=
       p [LoadMapFd (Reg 1) map_fd ]
 
+  , testCase "Splice in value in ldabs" $
+      let val = 42 in
+        [ebpf| ldabsw #{val} |]
+      @?=
+      p [LoadAbs B32 val ]
+
       ]
 
 

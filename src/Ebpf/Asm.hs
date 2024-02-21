@@ -38,6 +38,7 @@ data Inst reg imm regimm =
   | Load BSize reg reg (Maybe MemoryOffset)
   | LoadImm reg imm
   | LoadMapFd reg imm
+  | LoadAbs BSize imm
   | JCond Jcmp reg regimm CodeOffset
   | Jmp CodeOffset
   | Call CodeOffset
