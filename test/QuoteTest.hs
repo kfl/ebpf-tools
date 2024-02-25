@@ -44,7 +44,7 @@ test_basic =
 
   , testCase "Splice immediate in reg/imm position" $
       let n = Imm 42 in
-      [ebpf| stb [r1+2], #{n}
+      [ebpf| stb [r1+2], $n
              ldxb r0, [r1+2]
              exit
              |]
@@ -55,7 +55,7 @@ test_basic =
 
   , testCase "Splice register in reg/imm position" $
       let r = R $ Reg 6 in
-      [ebpf| add r1, #{r}
+      [ebpf| add r1, $r
              add r1, r1
              exit
              |]
@@ -66,7 +66,7 @@ test_basic =
 
   , testCase "Splice immediate in lddw instruction" $
       let n = 424242424242424242 in
-      [ebpf| lddw r0, #{n}
+      [ebpf| lddw r0, $n
              exit
              |]
       @?=
@@ -78,8 +78,8 @@ test_basic =
           r1 = Reg 1
           rr1 = R $ Reg 1
       in
-      [ebpf| add #{r1}, #{r6}
-             add r1, #{rr1}
+      [ebpf| add $r1, $r6
+             add r1, $rr1
              exit
              |]
       @?=
@@ -93,9 +93,9 @@ test_basic =
           r1 = Reg 1
           rr1 = R $ Reg 1
       in
-      [ebpf| lddw #{r1}, #{n}
-             add #{r1}, #{r6}
-             add r1, #{rr1}
+      [ebpf| lddw $r1, $n
+             add $r1, $r6
+             add r1, $rr1
              exit
              |]
       @?=
@@ -106,7 +106,7 @@ test_basic =
 
   , testCase "Splice immediate in stxb instruction (is arguable wrong)" $
       let n = Imm 42 in
-      [ebpf| stxb [r1+2], #{n}
+      [ebpf| stxb [r1+2], $n
              exit
              |]
       @?=
@@ -115,7 +115,7 @@ test_basic =
 
   , testCase "Splice reg in memory reference" $
       let r = Reg 1 in
-      [ebpf| stxb [#{r} + 2], r0
+      [ebpf| stxb [$r + 2], r0
              exit
              |]
       @?=
@@ -123,7 +123,7 @@ test_basic =
         , Exit]
 
   , testCase "Parsing of reasonable splice variables" $
-     parseWithSpliceVars Parser.program "mov #{r'}, #{a_38}"
+     parseWithSpliceVars Parser.program "mov $r', $a_38"
      @?=
      Right [Binary B64 Mov (Var "r'") (Var "a_38")]
 
@@ -131,8 +131,8 @@ test_basic =
       let r' = Reg 1
           a_38 = Reg 0
       in
-      [ebpf| mov #{r'}, 0
-             mov #{a_38}, 42
+      [ebpf| mov $r', 0
+             mov $a_38, 42
              exit
              |]
       @?=
@@ -142,23 +142,32 @@ test_basic =
 
   , testCase "Splice in some map fd" $
       let map_fd = 2 in
-        [ebpf| lmfd r1, #{map_fd} |]
+        [ebpf| lmfd r1, $map_fd |]
       @?=
       p [ LoadMapFd (Reg 1) map_fd ]
 
   , testCase "Splice in value in ldabs" $
       let val = 42 in
-        [ebpf| ldabsw #{val} |]
+        [ebpf| ldabsw $val |]
       @?=
       p [ LoadAbs B32 val ]
 
   , testCase "Splice in function in call" $
       let v_BPF_MAP_LOOKUP_ELEM = 0 in
-        [ebpf| call #{v_BPF_MAP_LOOKUP_ELEM}
+        [ebpf| call $v_BPF_MAP_LOOKUP_ELEM
                exit |]
       @?=
       p [ Call v_BPF_MAP_LOOKUP_ELEM
         , Exit ]
+
+  , testCase "Splice without spaces" $
+      let r = Reg 1 in
+      [ebpf| stxb [$r+2], r0
+             exit
+             |]
+      @?=
+      p [ Store B8 r (Just 2) (R $ Reg 0)
+        , Exit]
 
       ]
 

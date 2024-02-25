@@ -55,7 +55,8 @@ rawImm32 = lexeme number <?> "extern function"
     sign = (char '-' >> return negate)
            <|> (optional (char '+') >> return id)
 
-splice = lexeme $ char '#' *> char '{' *> ident <* char '}'
+-- splice = lexeme $ char '#' *> char '{' *> ident <* char '}'
+splice = lexeme $ char '$' *> ident
   where ident = (:) <$> letter <*> (many (alphaNum <|> oneOf "_'"))
 
 reg = do
