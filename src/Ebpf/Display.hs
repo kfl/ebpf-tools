@@ -69,5 +69,4 @@ instance Display (Inst Reg Imm RegImm HelperId) where
       Exit -> ["exit"]
 
 displayProgram :: Program -> T.Text
-displayProgram prog =
-  T.concat $ map (\i -> display i <> "\n") prog
+displayProgram prog = T.unlines $ map display prog
